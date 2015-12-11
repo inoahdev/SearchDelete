@@ -4,7 +4,9 @@
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 #import <substrate.h>
+#import <dlfcn.h>
 
+#import "CyDelete.h"
 #import "Interfaces.h"
 
 #define kiOS7 (kCFCoreFoundationVersionNumber >= 847.20 && kCFCoreFoundationVersionNumber <= 847.27)
@@ -64,10 +66,11 @@ static void LoadPreferences() {
         return;
     }
 
-    SBApplication *application = [[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.result.bundleID] retain];
-    SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-    if (![icon isKindOfClass:%c(SBApplicationIcon)]) {
-        return;
+    SBIconModel *model = (SBIconModel *)[[%c(SBIconController) sharedInstance] model];
+    SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
+
+    if (%c(CDUninstallDpkgOperation)) {
+        
     }
 
     SBDeleteIconAlertItem *alertItem = [[[%c(SBDeleteIconAlertItem) alloc] initWithIcon:icon] autorelease];
