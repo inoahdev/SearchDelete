@@ -6,7 +6,6 @@
 #import <substrate.h>
 #import <dlfcn.h>
 
-#import "CyDelete.h"
 #import "Interfaces.h"
 
 #define kiOS7 (kCFCoreFoundationVersionNumber >= 847.20 && kCFCoreFoundationVersionNumber <= 847.27)
@@ -66,11 +65,12 @@ static void LoadPreferences() {
         return;
     }
 
+
     SBIconModel *model = (SBIconModel *)[[%c(SBIconController) sharedInstance] model];
     SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
 
-    if (%c(CDUninstallDpkgOperation)) {
-        SDDebugLog(@"");
+    if ([self.result isSystemApplication]) { //Use CyDelete
+        [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:icon]; //Have CyDelete record identifier before activating alert
     }
 
     SBDeleteIconAlertItem *alertItem = [[[%c(SBDeleteIconAlertItem) alloc] initWithIcon:icon] autorelease];
@@ -127,6 +127,15 @@ static void LoadPreferences() {
     }
 
     return ([[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID] != nil);
+}
+
+%new
+- (BOOL)isSystemApplication {
+    if (![self isApplication]) {
+        return NO;
+    }
+
+    return ([[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID] isSystemApplication]);
 }
 
 %new

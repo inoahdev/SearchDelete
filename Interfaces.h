@@ -50,11 +50,13 @@
 @interface SBIconController : NSObject
 + (id)sharedInstance;
 - (SBIconModel *)model;
+- (void)iconCloseBoxTapped:(SBIcon *)icon;
 @property(nonatomic) BOOL isEditing;
 @end
 
 @interface SPSearchResult : NSObject
 - (BOOL)isApplication;
+- (BOOL)isSystemApplication;
 - (BOOL)searchdelete_allowsUninstall;
 @property(nonatomic, copy) NSString *bundleID; //nil if not application
 @property(nonatomic, strong) NSString *section_header;
