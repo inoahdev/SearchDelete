@@ -70,7 +70,7 @@ static void LoadPreferences() {
     SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
 
     if (%c(CDUninstallDpkgOperation)) {
-        
+        SDDebugLog(@"");
     }
 
     SBDeleteIconAlertItem *alertItem = [[[%c(SBDeleteIconAlertItem) alloc] initWithIcon:icon] autorelease];
@@ -149,7 +149,11 @@ static void LoadPreferences() {
 %hook SPUISearchViewController
 %new
 - (BOOL)isActivated {
-    return [[self valueForKeyPath:@"_activated"] boolValue];
+    if (NSNumber *activated = [self valueForKeyPath:@"_activated"]) {
+        return [activated boolValue];
+    }
+
+    return NO;
 }
 %end
 
@@ -158,7 +162,7 @@ static void LoadPreferences() {
 - (void)_dismissAnimated:(BOOL)animated triggeringAction:(UIAlertAction *)action triggeredByPopoverDimmingView:(BOOL)dimmingView {
     %orig();
 
-    if (self != [(UIAlertController *)objc_getAssociatedObject([%c(SPUISearchViewController) sharedInstance], &kSearchDeleteAssossciatedObjectSearchUITableViewDeleteIconAlertItemKey) performSelector:@selector(alertController)]) {
+    if (self != [(SBDeleteIconAlertItem *)objc_getAssociatedObject([%c(SPUISearchViewController) sharedInstance], &kSearchDeleteAssossciatedObjectSearchUITableViewDeleteIconAlertItemKey) alertController]) {
         return;
     }
 
@@ -168,6 +172,10 @@ static void LoadPreferences() {
 
     UITableView *tableView = MSHookIvar<UITableView *>([%c(SPUISearchViewController) sharedInstance], "_tableView");
     if (!tableView) {
+        return;
+    }
+
+    if (self._cancelAction != action) {
         return;
     }
 
@@ -187,13 +195,9 @@ static void LoadPreferences() {
 
             [tableViewCell searchdelete_stopJittering];
 
-            if (self._cancelAction == action) { //cancel Action is Delete Action
-                [tableViewCell removeFromSuperview];
-
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                    [[%c(SPUISearchViewController) sharedInstance] performSelector:@selector(_searchFieldEditingChanged)];
-                });
-            }
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                [[%c(SPUISearchViewController) sharedInstance] performSelector:@selector(_searchFieldEditingChanged)];
+            });
         }
     }
 }
