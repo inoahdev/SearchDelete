@@ -1,13 +1,13 @@
-#include "SearchDeletePrefsRootListController.h"
+#include "SearchDeleteRootListController.h"
 
-@interface UIApplication()
+@interface UIApplication ()
 - (void)suspend;
 @end
 
-@implementation SearchDeletePrefsRootListController
+@implementation SearchDeleteRootListController
 - (NSArray *)specifiers {
 	if (!_specifiers) {
-		_specifiers = [self loadSpecifiersFromPlistName:@"SearchDelete" target:self];
+		_specifiers = [[self loadSpecifiersFromPlistName:@"SearchDelete" target:self] retain];
 	}
 
 	return _specifiers;
@@ -17,7 +17,7 @@
     [[UIApplication sharedApplication] suspend];
     usleep(515000);
 
-    system("killall backboardd");
+    [(SpringBoard *)[UIApplication sharedApplication] _relaunchSpringBoardNow];
 }
 
 - (void)twitter {

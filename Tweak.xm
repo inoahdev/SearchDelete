@@ -12,6 +12,7 @@
 #define kiOS9 (kCFCoreFoundationVersionNumber == 1240.10)
 
 #define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
+#define SDDebugLog(FORMAT, ...) NSLog(@"[SearchDelete: %s - %i] %@", __FILE__, __LINE__, [NSString stringWithFormat:FORMAT, ##__VA_ARGS__])
 
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";
@@ -22,12 +23,15 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
 static NSDictionary *prefs = nil;
 static CFStringRef applicationID = CFSTR("com.noahdev.searchdelete");
 
-#define SDDebugLog(FORMAT, ...) NSLog(@"[SearchDelete: %s - %i] %@", __FILE__, __LINE__, [NSString stringWithFormat:FORMAT, ##__VA_ARGS__])
-
 static void LoadPreferences() {
     if (CFPreferencesAppSynchronize(applicationID)) { //sharedRoutine - MSGAutoSave8
         CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) ?: CFArrayCreate(NULL, NULL, 0, NULL);
-        prefs = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        if (access("/var/mobile/Library/Preferences/com.noahdev.searchdelete", F_OK) != -1) {
+            prefs = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        } else { //register defaults for first launch
+            prefs = @{@"kEnabledLongPress" : @YES,
+                      @"kJitter" : @YES};
+        }
 
         CFRelease(keyList);
     }
@@ -94,10 +98,6 @@ static void LoadPreferences() {
 
     SBIconModel *model = (SBIconModel *)[[%c(SBIconController) sharedInstance] model];
     SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
-
-    if ([self.result isSystemApplication] && access("/Library/MobileSubstrate/DynamicLibraries/CyDelete.dylib", F_OK) == -1) {
-        return;
-    }
 
     SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] iconViewForIcon:icon];
     [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:iconView]; //Have CyDelete record identifier
