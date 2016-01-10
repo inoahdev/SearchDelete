@@ -62,6 +62,7 @@ static void LoadPreferences() {
     }
 
     [currentJitteringCell searchdelete_stopJittering];
+    currentJitteringCell = nil;
 }
 %end
 %hook SearchUISingleResultTableViewCell
