@@ -4,7 +4,6 @@
 #import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 #import <substrate.h>
-#import <dlfcn.h>
 
 #import "Interfaces.h"
 
@@ -12,11 +11,13 @@
 #define kiOS8 (kCFCoreFoundationVersionNumber >= 1140.10 && kCFCoreFoundationVersionNumber >= 1145.15)
 #define kiOS9 (kCFCoreFoundationVersionNumber == 1240.10)
 
+#define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
+
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";
+static SearchUISingleResultTableViewCell *currentJitteringCell = nil;
 
 static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey;
-static const char *kSearchDeleteAssossciatedObjectSearchUITableViewDeleteIconAlertItemKey;
 
 static NSDictionary *prefs = nil;
 static CFStringRef applicationID = CFSTR("com.noahdev.searchdelete");
@@ -33,6 +34,32 @@ static void LoadPreferences() {
 }
 
 %group iOS9
+%hook SBDeleteIconAlertItem
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    %orig();
+
+    if (!currentJitteringCell) {
+        return;
+    }
+
+    NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
+
+    if ([buttonTitle isEqualToString:SBLocalizedString(@"DELETE_ICON_CONFIRM")]) {
+        if ([currentJitteringCell.result isSystemApplication]) {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Respring"
+                                                            message:@"A respring is required to fully delete System Applications. Until you respring, a non-functioning icon will exist on SpringBoard and Spotlight will still show results for the Application. Do you want to respring now?"
+                                                           delegate:[%c(SPUISearchViewController) sharedInstance]
+                                                  cancelButtonTitle:@"Later"
+                                                  otherButtonTitles:@"Respring", nil];
+            [alert show];
+        } else {
+            [[%c(SPUISearchViewController) sharedInstance] searchdelete_reload];
+        }
+    }
+
+    [currentJitteringCell searchdelete_stopJittering];
+}
+%end
 %hook SearchUISingleResultTableViewCell
 - (void)layoutSubviews {
     %orig();
@@ -46,8 +73,8 @@ static void LoadPreferences() {
     }
 
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
-                                                                                            action:@selector(searchDelete_longPressGestureRecognizer:)];
-    longPress.minimumPressDuration = 0.5; //TODO:find system default
+                                                                                            action:@selector(searchdelete_longPressGestureRecognizer:)];
+    longPress.minimumPressDuration = 0.5; //TODO: find system default
     longPress.cancelsTouchesInView = YES;
 
     if (![self.gestureRecognizers containsObject:longPress]) {
@@ -56,7 +83,7 @@ static void LoadPreferences() {
 }
 
 %new
-- (void)searchDelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
+- (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
     if (recognizer.state != UIGestureRecognizerStateBegan || ![prefs[@"kEnabledLongPress"] boolValue]) {
         return;
     }
@@ -65,18 +92,15 @@ static void LoadPreferences() {
         return;
     }
 
-
     SBIconModel *model = (SBIconModel *)[[%c(SBIconController) sharedInstance] model];
     SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
 
-    if ([self.result isSystemApplication]) { //Use CyDelete
-        [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:icon]; //Have CyDelete record identifier before activating alert
+    if ([self.result isSystemApplication] && access("/Library/MobileSubstrate/DynamicLibraries/CyDelete.dylib", F_OK) == -1) {
+        return;
     }
 
-    SBDeleteIconAlertItem *alertItem = [[[%c(SBDeleteIconAlertItem) alloc] initWithIcon:icon] autorelease];
-    [[%c(SBAlertItemsController) sharedInstance] activateAlertItem:alertItem];
-
-    objc_setAssociatedObject([%c(SPUISearchViewController) sharedInstance], &kSearchDeleteAssossciatedObjectSearchUITableViewDeleteIconAlertItemKey, alertItem, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] iconViewForIcon:icon];
+    [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:iconView]; //Have CyDelete record identifier
 
     //add animations
     if ([prefs[@"kJitter"] boolValue]) {
@@ -86,8 +110,15 @@ static void LoadPreferences() {
 
 %new
 - (void)searchdelete_startJittering {
-    [self.thumbnailContainer.layer addAnimation:[%c(SBIconView) _jitterTransformAnimation] forKey:kSearchDeleteJitterTransformAnimationKey];
-    [self.thumbnailContainer.layer addAnimation:[%c(SBIconView) _jitterPositionAnimation] forKey:kSearchDeleteJitterPositionAnimationKey];
+    currentJitteringCell = self;
+
+    if (![self.thumbnailContainer.layer animationForKey:kSearchDeleteJitterTransformAnimationKey]) {
+        [self.thumbnailContainer.layer addAnimation:[%c(SBIconView) _jitterTransformAnimation] forKey:kSearchDeleteJitterTransformAnimationKey];
+    }
+
+    if (![self.thumbnailContainer.layer animationForKey:kSearchDeleteJitterPositionAnimationKey]) {
+        [self.thumbnailContainer.layer addAnimation:[%c(SBIconView) _jitterPositionAnimation] forKey:kSearchDeleteJitterPositionAnimationKey];
+    }
 
     objc_setAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
@@ -107,14 +138,6 @@ static void LoadPreferences() {
         [self.thumbnailContainer.layer removeAnimationForKey:kSearchDeleteJitterPositionAnimationKey];
     }
 
-    if ([self.textAreaView.layer animationForKey:kSearchDeleteJitterTransformAnimationKey]) {
-        [self.textAreaView.layer removeAnimationForKey:kSearchDeleteJitterTransformAnimationKey];
-    }
-
-    if ([self.textAreaView.layer animationForKey:kSearchDeleteJitterPositionAnimationKey]) {
-        [self.textAreaView.layer removeAnimationForKey:kSearchDeleteJitterPositionAnimationKey];
-    }
-
     objc_setAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey, @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 %end
@@ -127,6 +150,15 @@ static void LoadPreferences() {
     }
 
     return ([[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID] != nil);
+}
+
+%new
+- (BOOL)isUserApplication {
+    if (![self isApplication]) {
+        return NO;
+    }
+
+    return [[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID] iconClass] == %c(SBUserInstalledApplicationIcon);
 }
 
 %new
@@ -144,11 +176,11 @@ static void LoadPreferences() {
         return NO;
     }
 
-    SBApplication *application = [[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID] retain];
+    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
     SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
 
-    if (![icon isKindOfClass:%c(SBApplicationIcon)]) {
-        return NO;
+    if (![icon allowsUninstall]) { //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
+        return [application iconAllowsUninstall:icon];
     }
 
     return [icon allowsUninstall];
@@ -164,50 +196,22 @@ static void LoadPreferences() {
 
     return NO;
 }
-%end
 
-//ugly implementation
-%hook UIAlertController
-- (void)_dismissAnimated:(BOOL)animated triggeringAction:(UIAlertAction *)action triggeredByPopoverDimmingView:(BOOL)dimmingView {
-    %orig();
+%new
+- (void)searchdelete_reload {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        [self _searchFieldEditingChanged];
+    });
+}
 
-    if (self != [(SBDeleteIconAlertItem *)objc_getAssociatedObject([%c(SPUISearchViewController) sharedInstance], &kSearchDeleteAssossciatedObjectSearchUITableViewDeleteIconAlertItemKey) alertController]) {
-        return;
-    }
+%new
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)index {
+    NSString *buttonTitle = [alertView buttonTitleAtIndex:index];
 
-    if (![[%c(SPUISearchViewController) sharedInstance] isActivated] || ![prefs[@"kEnabledLongPress"] boolValue] || ![prefs[@"kJitter"] boolValue]) {
-        return;
-    }
-
-    UITableView *tableView = MSHookIvar<UITableView *>([%c(SPUISearchViewController) sharedInstance], "_tableView");
-    if (!tableView) {
-        return;
-    }
-
-    if (self._cancelAction != action) {
-        return;
-    }
-
-    for (NSInteger j = 0; j < [tableView numberOfSections]; j++) {
-        for (NSInteger i = 0; i < [tableView numberOfRowsInSection:j]; i++) {
-            SearchUISingleResultTableViewCell *cell = (SearchUISingleResultTableViewCell *)[tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:i inSection:j]];
-
-            if (![cell isKindOfClass:%c(SearchUISingleResultTableViewCell)]) {
-                continue;
-            }
-
-            SearchUISingleResultTableViewCell *tableViewCell = (SearchUISingleResultTableViewCell *)cell;
-
-            if (![tableViewCell searchdelete_isJittering]) {
-                continue;
-            }
-
-            [tableViewCell searchdelete_stopJittering];
-
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                [[%c(SPUISearchViewController) sharedInstance] performSelector:@selector(_searchFieldEditingChanged)];
-            });
-        }
+    if ([buttonTitle isEqualToString:@"Respring"]) {
+        [(SpringBoard *)[UIApplication sharedApplication] _relaunchSpringBoardNow];
+    } else if ([buttonTitle isEqualToString:@"Later"]) {
+        [self searchdelete_reload];
     }
 }
 %end

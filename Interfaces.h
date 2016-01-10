@@ -3,23 +3,26 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface SBIconView : NSObject
-+ (id)_jitterTransformAnimation;
-+ (id)_jitterPositionAnimation;
+@interface SpringBoard : UIApplication
+- (void)_relaunchSpringBoardNow;
 @end
 
 @interface SBIcon : NSObject
 @end
 
 @interface SBApplication : NSObject
-- (NSString *)displayName;
-- (NSString *)bundleIdentifier;
 - (BOOL)isSystemApplication;
+- (Class)iconClass;
+- (BOOL)iconAllowsUninstall:(SBIcon *)icon;
+@end
+
+@interface SBIconView : NSObject
++ (id)_jitterTransformAnimation;
++ (id)_jitterPositionAnimation;
 @end
 
 @interface SBApplicationIcon : SBIcon
 - (id)initWithApplication:(SBApplication *)application;
-- (SBApplication *)application;
 - (BOOL)allowsUninstall;
 @end
 
@@ -28,19 +31,12 @@
 - (SBApplication *)applicationWithBundleIdentifier:(NSString *)bundleIdentifier;
 @end
 
-@interface SBDeleteIconAlertItem : NSObject
-- (id)initWithIcon:(SBIcon *)icon;
-@property(nonatomic, strong) UIAlertController *alertController;
-@end
-
 @interface UIAlertController ()
 @property(readonly) UIAlertAction *_cancelAction;
 @end
 
-@interface SBAlertItemsController : NSObject
-+ (id)sharedInstance;
-- (void)activateAlertItem:(SBDeleteIconAlertItem *)alertItem;
-- (NSArray *)alertItemsOfClass:(Class)alertClass;
+@interface UIAlertAction ()
+- (void)setHandler:(void (^)(UIAlertAction *action))handler; // @synthesize handler=_handler;
 @end
 
 @interface SBIconModel : NSObject
@@ -50,15 +46,22 @@
 @interface SBIconController : NSObject
 + (id)sharedInstance;
 - (SBIconModel *)model;
-- (void)iconCloseBoxTapped:(SBIcon *)icon;
+- (void)iconCloseBoxTapped:(SBIconView *)icon;
 @property(nonatomic) BOOL isEditing;
+@end
+
+@interface SBIconViewMap : NSObject
++ (id)homescreenMap;
+- (SBIconView *)iconViewForIcon:(SBIcon *)icon;
 @end
 
 @interface SPSearchResult : NSObject
 - (BOOL)isApplication;
+- (BOOL)isUserApplication;
 - (BOOL)isSystemApplication;
 - (BOOL)searchdelete_allowsUninstall;
-@property(nonatomic, copy) NSString *bundleID; //nil if not application
+@property(nonatomic, strong) NSString *title;
+@property(nonatomic, copy) NSString *bundleID;
 @property(nonatomic, strong) NSString *section_header;
 @end
 
@@ -71,11 +74,16 @@
 - (BOOL)searchdelete_isJittering;
 - (BOOL)searchdelete_stopJittering;
 @property(retain) UIView *thumbnailContainer;
-@property(retain) SearchUITextAreaView *textAreaView;
 @property(nonatomic, strong) SPSearchResult *result;
 @end
 
-@interface SPUISearchViewController : UIViewController
+@interface SPUISearchHeader : NSObject
+- (UITextField *)searchField;
+@end
+
+@interface SPUISearchViewController : UIViewController <UIAlertViewDelegate>
 + (id)sharedInstance;
 - (BOOL)isActivated;
+- (void)_searchFieldEditingChanged;
+- (void)searchdelete_reload;
 @end
