@@ -46,6 +46,10 @@ static void LoadPreferences() {
         return;
     }
 
+    if (![currentJitteringCell searchdelete_isJittering]) {
+        return;
+    }
+
     NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
 
     if ([buttonTitle isEqualToString:SBLocalizedString(@"DELETE_ICON_CONFIRM")]) {
@@ -62,7 +66,6 @@ static void LoadPreferences() {
     }
 
     [currentJitteringCell searchdelete_stopJittering];
-    currentJitteringCell = nil;
 }
 %end
 %hook SearchUISingleResultTableViewCell
