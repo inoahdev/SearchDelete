@@ -53,6 +53,7 @@
 @interface SBIconViewMap : NSObject
 + (id)homescreenMap;
 - (SBIconView *)iconViewForIcon:(SBIcon *)icon;
+- (SBIconView *)mappedIconViewForIcon:(SBIcon *)icon;
 @end
 
 @interface SPSearchResult : NSObject
