@@ -103,8 +103,12 @@ static void LoadPreferences() {
     SBIconModel *model = (SBIconModel *)[[%c(SBIconController) sharedInstance] model];
     SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
 
-    SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] iconViewForIcon:icon];
-    [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:iconView]; //Have CyDelete record identifier
+    SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] mappedIconViewForIcon:icon];
+    if (!iconView) {
+        iconView = [[%c(SBIconViewMap) homescreenMap] iconViewForIcon:icon]; //create SBIconView, but only when one is not readily available
+    }
+
+    [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:iconView];
 
     //add animations
     if ([prefs[@"kJitter"] boolValue]) {
