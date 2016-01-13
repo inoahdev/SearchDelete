@@ -161,15 +161,6 @@ static void LoadPreferences() {
 }
 
 %new
-- (BOOL)isUserApplication {
-    if (![self isApplication]) {
-        return NO;
-    }
-
-    return [[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID] iconClass] == %c(SBUserInstalledApplicationIcon);
-}
-
-%new
 - (BOOL)isSystemApplication {
     if (![self isApplication]) {
         return NO;
