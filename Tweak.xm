@@ -53,7 +53,7 @@ static void LoadPreferences() {
     NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
 
     if ([buttonTitle isEqualToString:SBLocalizedString(@"DELETE_ICON_CONFIRM")]) {
-        if ([currentJitteringCell.result isSystemApplication]) {
+        if ([currentJitteringCell.result searchdelete_isSystemApplication]) {
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Respring"
                                                             message:@"A respring is required to fully delete System Applications. Until you respring, a non-functioning icon will exist on SpringBoard and Spotlight will still show results for the Application. Do you want to respring now?"
                                                            delegate:[%c(SPUISearchViewController) sharedInstance]
@@ -152,7 +152,7 @@ static void LoadPreferences() {
 
 %hook SPSearchResult
 %new
-- (BOOL)isApplication {
+- (BOOL)searchdelete_isApplication {
     if (!self.bundleID || self.section_header) {
         return NO;
     }
@@ -161,8 +161,8 @@ static void LoadPreferences() {
 }
 
 %new
-- (BOOL)isSystemApplication {
-    if (![self isApplication]) {
+- (BOOL)searchdelete_isSystemApplication {
+    if (![self searchdelete_isApplication]) {
         return NO;
     }
 
@@ -171,7 +171,7 @@ static void LoadPreferences() {
 
 %new
 - (BOOL)searchdelete_allowsUninstall {
-    if (![self isApplication]) {
+    if (![self searchdelete_isApplication]) {
         return NO;
     }
 

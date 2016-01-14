@@ -57,9 +57,9 @@
 @end
 
 @interface SPSearchResult : NSObject
-- (BOOL)isApplication;
+- (BOOL)searchdelete_isApplication;
 - (BOOL)isUserApplication;
-- (BOOL)isSystemApplication;
+- (BOOL)searchdelete_isSystemApplication;
 - (BOOL)searchdelete_allowsUninstall;
 @property(nonatomic, strong) NSString *title;
 @property(nonatomic, copy) NSString *bundleID;
