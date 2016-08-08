@@ -3,8 +3,13 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-@interface SpringBoard : UIApplication
-- (void)_relaunchSpringBoardNow;
+@interface FBSSystemService : NSObject
++ (instancetype)sharedService;
+- (void)sendActions:(NSSet *)actions withResult:(id)result;
+@end
+
+@interface SBSRelaunchAction
++ (instancetype)actionWithReason:(NSString *)reason options:(int)options targetURL:(NSURL *)target;
 @end
 
 @interface SBIcon : NSObject
@@ -14,6 +19,8 @@
 - (BOOL)isSystemApplication;
 - (Class)iconClass;
 - (BOOL)iconAllowsUninstall:(SBIcon *)icon;
+
+@property(nonatomic, getter=isUninstallAllowed) BOOL uninstallAllowed;
 @end
 
 @interface SBIconView : NSObject
@@ -43,17 +50,19 @@
 - (SBIcon *)expectedIconForDisplayIdentifier:(NSString *)identifier; //why not bundle identifier?
 @end
 
-@interface SBIconController : NSObject
-+ (id)sharedInstance;
-- (SBIconModel *)model;
-- (void)iconCloseBoxTapped:(SBIconView *)icon;
-@property(nonatomic) BOOL isEditing;
-@end
-
 @interface SBIconViewMap : NSObject
 + (id)homescreenMap;
 - (SBIconView *)iconViewForIcon:(SBIcon *)icon;
 - (SBIconView *)mappedIconViewForIcon:(SBIcon *)icon;
+@end
+
+@interface SBIconController : NSObject
++ (id)sharedInstance;
+- (SBIconModel *)model;
+- (void)iconCloseBoxTapped:(SBIconView *)icon;
+
+@property(nonatomic) BOOL isEditing;
+@property(nonatomic, strong) SBIconViewMap *homescreenMap;
 @end
 
 @interface SPSearchResult : NSObject

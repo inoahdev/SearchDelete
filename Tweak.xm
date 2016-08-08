@@ -1,39 +1,36 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
-#import <objc/runtime.h>
 #import <UIKit/UIKit.h>
 #import <substrate.h>
+#import <version.h>
 
 #import "Interfaces.h"
 
-#define kiOS7 (kCFCoreFoundationVersionNumber >= 847.20 && kCFCoreFoundationVersionNumber <= 847.27)
-#define kiOS8 (kCFCoreFoundationVersionNumber >= 1140.10 && kCFCoreFoundationVersionNumber >= 1145.15)
-#define kiOS9 (kCFCoreFoundationVersionNumber == 1240.10)
-
 #define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
-#define SDDebugLog(FORMAT, ...) NSLog(@"[SearchDelete: %s - %i] %@", __FILE__, __LINE__, [NSString stringWithFormat:FORMAT, ##__VA_ARGS__])
+#define SDDebugLog(FORMAT, ...) NSLog(@"[SearchDelete: %s - %i] %@", __FILE__, __LINE__, [NSString stringWithFormat:@(FORMAT), ##__VA_ARGS__])
 
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";
-static SearchUISingleResultTableViewCell *currentJitteringCell = nil;
 
+static SearchUISingleResultTableViewCell *currentJitteringCell = nil;
 static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey;
 
 static NSDictionary *prefs = nil;
-static CFStringRef applicationID = CFSTR("com.noahdev.searchdelete");
 
 static void LoadPreferences() {
+    CFStringRef applicationID = CFStringCreateWithCString(CFAllocatorGetDefault(), "com.inoahdev.searchdelete", kCFStringEncodingUTF8);
+
     if (CFPreferencesAppSynchronize(applicationID)) { //sharedRoutine - MSGAutoSave8
-        CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) ?: CFArrayCreate(NULL, NULL, 0, NULL);
-        if (access("/var/mobile/Library/Preferences/com.noahdev.searchdelete", F_OK) != -1) {
+        if (access("/var/mobile/Library/Preferences/com.inoahdev.searchdelete", F_OK) != -1) {
+            CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) ?: CFArrayCreate(NULL, NULL, 0, NULL);
             prefs = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+
+            CFRelease(keyList);
         } else { //register defaults for first launch
             prefs = @{@"kEnabledLongPress" : @YES,
                       @"kJitter" : @YES};
         }
-
-        CFRelease(keyList);
     }
 }
 
@@ -68,6 +65,7 @@ static void LoadPreferences() {
     [currentJitteringCell searchdelete_stopJittering];
 }
 %end
+
 %hook SearchUISingleResultTableViewCell
 - (void)layoutSubviews {
     %orig();
@@ -100,12 +98,28 @@ static void LoadPreferences() {
         return;
     }
 
-    SBIconModel *model = (SBIconModel *)[[%c(SBIconController) sharedInstance] model];
+    SBIconController *iconController = [%c(SBIconController) sharedInstance];
+
+    SBIconModel *model = (SBIconModel *)[iconController model];
     SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
 
-    SBIconView *iconView = [[%c(SBIconViewMap) homescreenMap] mappedIconViewForIcon:icon];
+    SBIconViewMap *homescreenMap = NULL;
+
+    if ([iconController respondsToSelector:@selector(homescreenMap)]) {
+        homescreenMap = [iconController homescreenMap];
+    } else if ([%c(SBIconViewMap) respondsToSelector:@selector(homescreenMap)]) {
+        homescreenMap = [%c(SBIconViewMap) homescreenMap];
+    } else {
+        //safety
+        return;
+    }
+
+    SBIconView *iconView = [homescreenMap mappedIconViewForIcon:icon];
     if (!iconView) {
-        iconView = [[%c(SBIconViewMap) homescreenMap] iconViewForIcon:icon]; //create SBIconView, but only when one is not readily available
+        iconView = [homescreenMap iconViewForIcon:icon]; //create SBIconView, but only when one is not readily available
+        if (!iconView) {
+            return;
+        }
     }
 
     [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:iconView];
@@ -166,7 +180,8 @@ static void LoadPreferences() {
         return NO;
     }
 
-    return ([[[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID] isSystemApplication]);
+    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
+    return [application isSystemApplication];
 }
 
 %new
@@ -178,18 +193,25 @@ static void LoadPreferences() {
     SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
     SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
 
-    if (![icon allowsUninstall]) { //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
-        return [application iconAllowsUninstall:icon];
+    if ([icon respondsToSelector:@selector(allowsUninstall)]) {
+        BOOL allowsUninstall = [icon allowsUninstall]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
+        if (!allowsUninstall && [application respondsToSelector:@selector(iconAllowsUninstall:)]) {
+            return [application iconAllowsUninstall:icon];
+        }
+
+        return allowsUninstall;
+    } else if ([application respondsToSelector:@selector(isUninstallAllowed)]) {
+        return [application isUninstallAllowed];
     }
 
-    return [icon allowsUninstall];
+    return false;
 }
 %end
 
 %hook SPUISearchViewController
 %new
 - (BOOL)isActivated {
-    if (NSNumber *activated = [self valueForKeyPath:@"_activated"]) {
+    if (NSNumber *activated = MSHookIvar<NSNumber *>(self, "_activated")) {
         return [activated boolValue];
     }
 
@@ -204,12 +226,13 @@ static void LoadPreferences() {
 }
 
 %new
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)index {
-    NSString *buttonTitle = [alertView buttonTitleAtIndex:index];
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex != [alertView cancelButtonIndex]) {
+        FBSSystemService *systemService = [%c(FBSSystemService) sharedService];
+        NSSet *actions = [NSSet setWithObject:[%c(SBSRelaunchAction) actionWithReason:@"RestartRenderServer" options:(1 << 2) targetURL:nil]];
 
-    if ([buttonTitle isEqualToString:@"Respring"]) {
-        [(SpringBoard *)[UIApplication sharedApplication] _relaunchSpringBoardNow];
-    } else if ([buttonTitle isEqualToString:@"Later"]) {
+        [systemService sendActions:actions withResult:nil];
+    } else {
         [self searchdelete_reload];
     }
 }
@@ -226,15 +249,15 @@ static void LoadPreferences() {
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
                                     NULL,
                                     (CFNotificationCallback)LoadPreferences,
-                                    CFSTR("NoahDevSearchDeletePreferencesChangedNotification"),
+                                    CFSTR("iNoahDevSearchDeletePreferencesChangedNotification"),
                                     NULL,
                                     CFNotificationSuspensionBehaviorDeliverImmediately);
     LoadPreferences();
 
-    if (kiOS9)
+    if (IS_IOS_BETWEEN(iOS_9_0, iOS_9_3_3))
         %init(iOS9);
-    if (kiOS8)
+    if (IS_IOS_BETWEEN(iOS_8_0, iOS_8_4))
         %init(iOS8);
-    if (kiOS7)
+    if (IS_IOS_BETWEEN(iOS_7_0, iOS_7_1))
         %init(iOS7)
 }
