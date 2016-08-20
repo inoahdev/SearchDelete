@@ -5,6 +5,7 @@ SearchDelete_FILES = SearchDeleteRootListController.m
 SearchDelete_INSTALL_PATH = /Library/PreferenceBundles
 SearchDelete_FRAMEWORKS = UIKit
 SearchDelete_PRIVATE_FRAMEWORKS = Preferences
+SearchDelete_LDFLAGS = -stdlib=libc++
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

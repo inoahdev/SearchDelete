@@ -1,9 +1,9 @@
-Package: com.noahdev.searchdelete
+Package: com.inoahdev.searchdelete
 Name: SearchDelete
 Depends: mobilesubstrate, preferenceloader, firmware (>= 9.0)
 Version: 1.1
 Architecture: iphoneos-arm
 Description: Delete Applications right in Spotlight with SearchDelete!
-Maintainer: NoahDev
-Author: NoahDev
+Maintainer: iNoahDev
+Author: iNoahDev
 Section: Tweaks

@@ -1,14 +1,16 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
 #import <substrate.h>
 #import <version.h>
 
 #import "Interfaces.h"
 
+extern "C" bool class_respondsToSelector_inst(Class cls, SEL sel, id inst);
+extern "C" void objc_release(id obj);
+
 #define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
-#define SDDebugLog(FORMAT, ...) NSLog(@"[SearchDelete: %s - %i] %@", __FILE__, __LINE__, [NSString stringWithFormat:@(FORMAT), ##__VA_ARGS__])
+#define SDDebugLog(FORMAT, ...) NSLog(@"[SearchDelete] %s:%i DEBUG:%@", __FILE__, __LINE__, [NSString stringWithFormat:FORMAT, ##__VA_ARGS__])
 
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";
@@ -16,21 +18,51 @@ static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDelete
 static SearchUISingleResultTableViewCell *currentJitteringCell = nil;
 static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey;
 
-static NSDictionary *prefs = nil;
+static NSDictionary *preferences = nil;
+static CFStringRef applicationID = nil;
+
+bool respondsToSelector(Class cls, SEL selector, id inst = nil) {
+    if (!cls || !selector) {
+        return false;
+    }
+
+    if (!inst) {
+        return class_getClassMethod(cls, selector);
+    }
+
+    return class_getInstanceMethod(cls, selector);
+}
+
+bool respondsToSelector(NSObject *inst, SEL selector) {
+    if (!inst || !selector) {
+        return false;
+    }
+
+    return class_getInstanceMethod(object_getClass(inst), selector);
+}
 
 static void LoadPreferences() {
-    CFStringRef applicationID = CFStringCreateWithCString(CFAllocatorGetDefault(), "com.inoahdev.searchdelete", kCFStringEncodingUTF8);
+    if (!applicationID) {
+        applicationID = CFStringCreateWithCString(CFAllocatorGetDefault(), "com.inoahdev.searchdelete", kCFStringEncodingUTF8);
+    }
+
+    if (!preferences) {
+        preferences = nil;
+    }
 
     if (CFPreferencesAppSynchronize(applicationID)) { //sharedRoutine - MSGAutoSave8
-        if (access("/var/mobile/Library/Preferences/com.inoahdev.searchdelete", F_OK) != -1) {
-            CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) ?: CFArrayCreate(NULL, NULL, 0, NULL);
-            prefs = (__bridge NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-
-            CFRelease(keyList);
-        } else { //register defaults for first launch
-            prefs = @{@"kEnabledLongPress" : @YES,
-                      @"kJitter" : @YES};
+        if (access("/private/var/mobile/Library/Preferences/com.inoahdev.searchdelete.plist", F_OK) != -1) {
+            CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+            if (keyList) {
+                preferences = (__bridge NSDictionary *)CFRetain(CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+                CFRelease(keyList);
+            }
         }
+    }
+
+    if (!preferences) {
+        preferences = @{@"kEnabledLongPress" : @YES,
+                        @"kJitter"           : @YES};
     }
 }
 
@@ -70,7 +102,11 @@ static void LoadPreferences() {
 - (void)layoutSubviews {
     %orig();
 
-    if (![prefs[@"kEnabledLongPress"] boolValue] || ![self.result isKindOfClass:%c(SPSearchResult)]) {
+    if (![preferences[@"kEnabledLongPress"] boolValue] || object_getClass(self.result) != %c(SPSearchResult)) {
+        return;
+    }
+
+    if (!respondsToSelector(self.result, @selector(searchdelete_allowsUninstall))) {
         return;
     }
 
@@ -90,7 +126,7 @@ static void LoadPreferences() {
 
 %new
 - (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
-    if (recognizer.state != UIGestureRecognizerStateBegan || ![prefs[@"kEnabledLongPress"] boolValue]) {
+    if (recognizer.state != UIGestureRecognizerStateBegan || ![preferences[@"kEnabledLongPress"] boolValue]) {
         return;
     }
 
@@ -103,12 +139,17 @@ static void LoadPreferences() {
     SBIconModel *model = (SBIconModel *)[iconController model];
     SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
 
-    SBIconViewMap *homescreenMap = NULL;
+    Class _SBIconViewMap = %c(SBIconViewMap);
+    if (!_SBIconViewMap) {
+        return;
+    }
 
-    if ([iconController respondsToSelector:@selector(homescreenMap)]) {
+    SBIconViewMap *homescreenMap = nil;
+
+    if (respondsToSelector(iconController, @selector(homescreenMap))) {
         homescreenMap = [iconController homescreenMap];
-    } else if ([%c(SBIconViewMap) respondsToSelector:@selector(homescreenMap)]) {
-        homescreenMap = [%c(SBIconViewMap) homescreenMap];
+    } else if (respondsToSelector(_SBIconViewMap, @selector(homescreenMap))) {
+        homescreenMap = [_SBIconViewMap homescreenMap];
     } else {
         //safety
         return;
@@ -122,10 +163,10 @@ static void LoadPreferences() {
         }
     }
 
-    [[%c(SBIconController) sharedInstance] iconCloseBoxTapped:iconView];
+    [iconController iconCloseBoxTapped:iconView];
 
     //add animations
-    if ([prefs[@"kJitter"] boolValue]) {
+    if ([preferences[@"kJitter"] boolValue]) {
         [self searchdelete_startJittering];
     }
 }
@@ -193,14 +234,14 @@ static void LoadPreferences() {
     SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
     SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
 
-    if ([icon respondsToSelector:@selector(allowsUninstall)]) {
+    if (respondsToSelector(icon, @selector(allowsUninstall))) {
         BOOL allowsUninstall = [icon allowsUninstall]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
-        if (!allowsUninstall && [application respondsToSelector:@selector(iconAllowsUninstall:)]) {
+        if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
             return [application iconAllowsUninstall:icon];
         }
 
         return allowsUninstall;
-    } else if ([application respondsToSelector:@selector(isUninstallAllowed)]) {
+    } else if (respondsToSelector(application, @selector(isUninstallAllowed))) {
         return [application isUninstallAllowed];
     }
 
@@ -228,10 +269,15 @@ static void LoadPreferences() {
 %new
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (buttonIndex != [alertView cancelButtonIndex]) {
-        FBSSystemService *systemService = [%c(FBSSystemService) sharedService];
-        NSSet *actions = [NSSet setWithObject:[%c(SBSRelaunchAction) actionWithReason:@"RestartRenderServer" options:(1 << 2) targetURL:nil]];
+        id _FBSystemService = nil;
+        if ((_FBSystemService = %c(FBSSystemService))) {
+            FBSSystemService *systemService = [_FBSystemService sharedService];
+            NSSet *actions = [NSSet setWithObject:[%c(SBSRelaunchAction) actionWithReason:@"RestartRenderServer" options:(1 << 2) targetURL:nil]];
 
-        [systemService sendActions:actions withResult:nil];
+            [systemService sendActions:actions withResult:nil];
+        } else {
+            [(SpringBoard *)[UIApplication sharedApplication] _relaunchSpringboardNow];
+        }
     } else {
         [self searchdelete_reload];
     }
@@ -260,4 +306,14 @@ static void LoadPreferences() {
         %init(iOS8);
     if (IS_IOS_BETWEEN(iOS_7_0, iOS_7_1))
         %init(iOS7)
+}
+
+%dtor {
+    if (applicationID) {
+        CFRelease(applicationID);
+    }
+
+    if (preferences) {
+        objc_release(preferences);
+    }
 }

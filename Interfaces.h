@@ -3,6 +3,10 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
+@interface SpringBoard : UIApplication
+- (void)_relaunchSpringboardNow;
+@end
+
 @interface FBSSystemService : NSObject
 + (instancetype)sharedService;
 - (void)sendActions:(NSSet *)actions withResult:(id)result;
