@@ -6,7 +6,6 @@
 
 #import "Interfaces.h"
 
-extern "C" bool class_respondsToSelector_inst(Class cls, SEL sel, id inst);
 extern "C" void objc_release(id obj);
 
 #define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
@@ -252,11 +251,15 @@ static void LoadPreferences() {
 %hook SPUISearchViewController
 %new
 - (BOOL)isActivated {
-    if (NSNumber *activated = MSHookIvar<NSNumber *>(self, "_activated")) {
-        return [activated boolValue];
+    if (CFBooleanRef activated = MSHookIvar<CFBooleanRef>(self, "_activated")) {
+        if (CFGetTypeID(activated) != CFBooleanGetTypeID()) {
+            return false;
+        }
+
+        return CFBooleanGetValue(activated);
     }
 
-    return NO;
+    return false;
 }
 
 %new
