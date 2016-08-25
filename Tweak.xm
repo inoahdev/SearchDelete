@@ -6,6 +6,7 @@
 
 #import "Interfaces.h"
 
+extern "C" id objc_retain(id obj);
 extern "C" void objc_release(id obj);
 
 #define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
@@ -45,7 +46,7 @@ static void LoadPreferences() {
         applicationID = CFStringCreateWithCString(CFAllocatorGetDefault(), "com.inoahdev.searchdelete", kCFStringEncodingUTF8);
     }
 
-    if (!preferences) {
+    if (preferences) {
         preferences = nil;
     }
 
@@ -53,7 +54,7 @@ static void LoadPreferences() {
         if (access("/private/var/mobile/Library/Preferences/com.inoahdev.searchdelete.plist", F_OK) != -1) {
             CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
             if (keyList) {
-                preferences = (__bridge NSDictionary *)CFRetain(CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
+                preferences = objc_retain((__bridge id)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
                 CFRelease(keyList);
             }
         }
@@ -104,6 +105,8 @@ static void LoadPreferences() {
     if (![preferences[@"kEnabledLongPress"] boolValue] || object_getClass(self.result) != %c(SPSearchResult)) {
         return;
     }
+
+    SPSearchResult *result = self.result;
 
     if (!respondsToSelector(self.result, @selector(searchdelete_allowsUninstall))) {
         return;
@@ -174,12 +177,17 @@ static void LoadPreferences() {
 - (void)searchdelete_startJittering {
     currentJitteringCell = self;
 
+    Class _SBIconView = %c(SBIconView);
+    if (!_SBIconView) {
+        return;
+    }
+
     if (![self.thumbnailContainer.layer animationForKey:kSearchDeleteJitterTransformAnimationKey]) {
-        [self.thumbnailContainer.layer addAnimation:[%c(SBIconView) _jitterTransformAnimation] forKey:kSearchDeleteJitterTransformAnimationKey];
+        [self.thumbnailContainer.layer addAnimation:[_SBIconView _jitterTransformAnimation] forKey:kSearchDeleteJitterTransformAnimationKey];
     }
 
     if (![self.thumbnailContainer.layer animationForKey:kSearchDeleteJitterPositionAnimationKey]) {
-        [self.thumbnailContainer.layer addAnimation:[%c(SBIconView) _jitterPositionAnimation] forKey:kSearchDeleteJitterPositionAnimationKey];
+        [self.thumbnailContainer.layer addAnimation:[_SBIconView _jitterPositionAnimation] forKey:kSearchDeleteJitterPositionAnimationKey];
     }
 
     objc_setAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -216,11 +224,15 @@ static void LoadPreferences() {
 
 %new
 - (BOOL)searchdelete_isSystemApplication {
-    if (![self searchdelete_isApplication]) {
+    if (!self.bundleID || self.section_header) {
         return NO;
     }
 
     SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
+    if (!application) {
+        return NO;
+    }
+
     return [application isSystemApplication];
 }
 
@@ -231,17 +243,22 @@ static void LoadPreferences() {
     }
 
     SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
-    SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+    if (!application) {
+        return NO;
+    }
 
-    if (respondsToSelector(icon, @selector(allowsUninstall))) {
-        BOOL allowsUninstall = [icon allowsUninstall]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
-        if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
-            return [application iconAllowsUninstall:icon];
-        }
-
-        return allowsUninstall;
-    } else if (respondsToSelector(application, @selector(isUninstallAllowed))) {
+    if (respondsToSelector(application, @selector(isUninstallAllowed))) {
         return [application isUninstallAllowed];
+    } else {
+        SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
+        if (respondsToSelector(icon, @selector(allowsUninstall))) {
+            BOOL allowsUninstall = [icon allowsUninstall]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
+            if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
+                allowsUninstall = [application iconAllowsUninstall:icon];
+            }
+
+            return allowsUninstall;
+        }
     }
 
     return false;
@@ -253,13 +270,13 @@ static void LoadPreferences() {
 - (BOOL)isActivated {
     if (CFBooleanRef activated = MSHookIvar<CFBooleanRef>(self, "_activated")) {
         if (CFGetTypeID(activated) != CFBooleanGetTypeID()) {
-            return false;
+            return NO;
         }
 
         return CFBooleanGetValue(activated);
     }
 
-    return false;
+    return NO;
 }
 
 %new
@@ -272,14 +289,28 @@ static void LoadPreferences() {
 %new
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (buttonIndex != [alertView cancelButtonIndex]) {
-        id _FBSystemService = nil;
-        if ((_FBSystemService = %c(FBSSystemService))) {
+        Class _FBSystemService = %c(FBSSystemService);
+        Class _SBSRelaunchAction = %c(SBSRelaunchAction);
+
+        if (_FBSystemService && _SBSRelaunchAction) {
             FBSSystemService *systemService = [_FBSystemService sharedService];
-            NSSet *actions = [NSSet setWithObject:[%c(SBSRelaunchAction) actionWithReason:@"RestartRenderServer" options:(1 << 2) targetURL:nil]];
+            NSSet *actions = [NSSet setWithObject:[_SBSRelaunchAction actionWithReason:@"RestartRenderServer" options:(1 << 2) targetURL:nil]];
 
             [systemService sendActions:actions withResult:nil];
         } else {
-            [(SpringBoard *)[UIApplication sharedApplication] _relaunchSpringboardNow];
+            UIApplication *application = [UIApplication sharedApplication];
+            if (respondsToSelector(application, @selector(_relaunchSpringboardNow))) {
+                [(SpringBoard *)application _relaunchSpringboardNow];
+            } else if (respondsToSelector(application, @selector(_tearDownNow))) {
+                [(SpringBoard *)application _tearDownNow];
+            } else {
+                UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                    message:@"Unable to respring, as the main respring methods used in SearchDelete are not found. Please send the developer an email containing your iOS Device type, and iOS Version to help fix this issue"
+                                                                   delegate:nil
+                                                          cancelButtonTitle:@"Ok"
+                                                          otherButtonTitles:nil];
+                [alertView show];
+            }
         }
     } else {
         [self searchdelete_reload];
@@ -298,7 +329,7 @@ static void LoadPreferences() {
     CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
                                     NULL,
                                     (CFNotificationCallback)LoadPreferences,
-                                    CFSTR("iNoahDevSearchDeletePreferencesChangedNotification"),
+                                    CFStringCreateWithCString(kCFAllocatorDefault, "iNoahDevSearchDeletePreferencesChangedNotification", kCFStringEncodingUTF8),
                                     NULL,
                                     CFNotificationSuspensionBehaviorDeliverImmediately);
     LoadPreferences();

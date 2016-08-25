@@ -5,6 +5,7 @@
 
 @interface SpringBoard : UIApplication
 - (void)_relaunchSpringboardNow;
+- (void)_tearDownNow;
 @end
 
 @interface FBSSystemService : NSObject
