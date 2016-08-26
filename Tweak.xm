@@ -21,7 +21,7 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
 static NSDictionary *preferences = nil;
 static CFStringRef applicationID = nil;
 
-bool respondsToSelector(Class cls, SEL selector, id inst = nil) {
+bool respondsToSelector(Class cls, SEL selector, bool inst = false) {
     if (!cls || !selector) {
         return false;
     }
@@ -108,11 +108,11 @@ static void LoadPreferences() {
 
     SPSearchResult *result = self.result;
 
-    if (!respondsToSelector(self.result, @selector(searchdelete_allowsUninstall))) {
+    if (!respondsToSelector(result, @selector(searchdelete_allowsUninstall))) {
         return;
     }
 
-    if (![self.result searchdelete_allowsUninstall]) {
+    if (![result searchdelete_allowsUninstall]) {
         return;
     }
 
@@ -132,14 +132,19 @@ static void LoadPreferences() {
         return;
     }
 
-    if (![self.result searchdelete_allowsUninstall]) {
+    SPSearchResult *result = self.result;
+    if (![result searchdelete_allowsUninstall]) {
         return;
     }
 
     SBIconController *iconController = [%c(SBIconController) sharedInstance];
+    SBIconModel *model = MSHookIvar<SBIconModel *>(iconController, "_iconModel");
 
-    SBIconModel *model = (SBIconModel *)[iconController model];
-    SBIcon *icon = [model expectedIconForDisplayIdentifier:self.result.bundleID];
+    if (!model) {
+        return;
+    }
+
+    SBIcon *icon = [model expectedIconForDisplayIdentifier:result.bundleID];
 
     Class _SBIconViewMap = %c(SBIconViewMap);
     if (!_SBIconViewMap) {
@@ -233,7 +238,12 @@ static void LoadPreferences() {
         return NO;
     }
 
-    return [application isSystemApplication];
+    SBApplicationInfo *info = MSHookIvar<SBApplicationInfo *>(info, "_appInfo");
+    if (!info) {
+        return NO;
+    }
+
+    return MSHookIvar<bool>(info, "_isSystemApplication");
 }
 
 %new
@@ -247,33 +257,33 @@ static void LoadPreferences() {
         return NO;
     }
 
-    if (respondsToSelector(application, @selector(isUninstallAllowed))) {
-        return [application isUninstallAllowed];
-    } else {
-        SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
-        if (respondsToSelector(icon, @selector(allowsUninstall))) {
-            BOOL allowsUninstall = [icon allowsUninstall]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
-            if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
-                allowsUninstall = [application iconAllowsUninstall:icon];
-            }
+    BOOL allowsUninstall = false;
 
-            return allowsUninstall;
+    if (respondsToSelector(application, @selector(isUninstallAllowed))) {
+        allowsUninstall = [application performSelectorOnMainThread:@selector(isUninstallAllowed) withObject:nil waitUntilDone:YES];
+    }
+
+    if (!allowsUninstall) {
+        Class _SBApplicationIcon = %c(SBApplicationIcon);
+        if (!respondsToSelector(_SBApplicationIcon, @selector(allowsUninstall), true)){
+            SBApplicationIcon *icon = [[_SBApplicationIcon alloc] initWithApplication:application];
+            allowsUninstall = [icon allowsUninstall]; //CyDelete hooks this method to allow uninstallation4
+
+            if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
+                allowsUninstall = [application iconAllowsUninstall:icon]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
+            }
         }
     }
 
-    return false;
+    return allowsUninstall;
 }
 %end
 
 %hook SPUISearchViewController
 %new
 - (BOOL)isActivated {
-    if (CFBooleanRef activated = MSHookIvar<CFBooleanRef>(self, "_activated")) {
-        if (CFGetTypeID(activated) != CFBooleanGetTypeID()) {
-            return NO;
-        }
-
-        return CFBooleanGetValue(activated);
+    if (NSNumber *activated = MSHookIvar<NSNumber *>(self, "_activated")) {
+        return [(__bridge NSNumber *)activated boolValue];
     }
 
     return NO;
