@@ -33,12 +33,21 @@ bool respondsToSelector(Class cls, SEL selector, bool inst = false) {
     return class_getInstanceMethod(cls, selector);
 }
 
-bool respondsToSelector(NSObject *inst, SEL selector) {
+bool respondsToSelector(NSObject *inst, SEL selector, bool inst = true) {
     if (!inst || !selector) {
         return false;
     }
 
-    return class_getInstanceMethod(object_getClass(inst), selector);
+    Class cls = object_getClass(inst);
+    if (!cls) {
+        return false;
+    }
+
+    if (!inst) {
+        return class_getClassMethod(cls, selector);
+    }
+
+    return class_getInstanceMethod(cls, selector);
 }
 
 static void LoadPreferences() {
@@ -265,13 +274,13 @@ static void LoadPreferences() {
 
     if (!allowsUninstall) {
         Class _SBApplicationIcon = %c(SBApplicationIcon);
-        if (!respondsToSelector(_SBApplicationIcon, @selector(allowsUninstall), true)){
+        if (respondsToSelector(_SBApplicationIcon, @selector(allowsUninstall), true)){
             SBApplicationIcon *icon = [[_SBApplicationIcon alloc] initWithApplication:application];
             allowsUninstall = [icon allowsUninstall]; //CyDelete hooks this method to allow uninstallation4
+        }
 
-            if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
-                allowsUninstall = [application iconAllowsUninstall:icon]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
-            }
+        if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
+            allowsUninstall = [application iconAllowsUninstall:icon]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
         }
     }
 
