@@ -283,7 +283,7 @@ static void LoadPreferences() {
 %new
 - (BOOL)isActivated {
     if (NSNumber *activated = MSHookIvar<NSNumber *>(self, "_activated")) {
-        return [(__bridge NSNumber *)activated boolValue];
+        return [activated boolValue];
     }
 
     return NO;
@@ -304,7 +304,9 @@ static void LoadPreferences() {
 
         if (_FBSystemService && _SBSRelaunchAction) {
             FBSSystemService *systemService = [_FBSystemService sharedService];
-            NSSet *actions = [NSSet setWithObject:[_SBSRelaunchAction actionWithReason:@"RestartRenderServer" options:(1 << 2) targetURL:nil]];
+            NSSet *actions = [NSSet setWithObject:[_SBSRelaunchAction actionWithReason:@"RestartRenderServer"
+                                                                               options:(1 << 2)
+                                                                             targetURL:nil]];
 
             [systemService sendActions:actions withResult:nil];
         } else {
