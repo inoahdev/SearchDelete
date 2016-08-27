@@ -33,7 +33,7 @@ bool respondsToSelector(Class cls, SEL selector, bool inst = false) {
     return class_getInstanceMethod(cls, selector);
 }
 
-bool respondsToSelector(NSObject *inst, SEL selector, bool inst = true) {
+bool respondsToSelector(NSObject *inst, SEL selector, bool useInstance = true) {
     if (!inst || !selector) {
         return false;
     }
@@ -43,7 +43,7 @@ bool respondsToSelector(NSObject *inst, SEL selector, bool inst = true) {
         return false;
     }
 
-    if (!inst) {
+    if (!useInstance) {
         return class_getClassMethod(cls, selector);
     }
 
@@ -111,11 +111,10 @@ static void LoadPreferences() {
 - (void)layoutSubviews {
     %orig();
 
-    if (![preferences[@"kEnabledLongPress"] boolValue] || object_getClass(self.result) != %c(SPSearchResult)) {
+    SPSearchResult *result = self.result;
+    if (![preferences[@"kEnabledLongPress"] boolValue] || object_getClass(result) != %c(SPSearchResult)) {
         return;
     }
-
-    SPSearchResult *result = self.result;
 
     if (!respondsToSelector(result, @selector(searchdelete_allowsUninstall))) {
         return;
@@ -247,12 +246,12 @@ static void LoadPreferences() {
         return NO;
     }
 
-    SBApplicationInfo *info = MSHookIvar<SBApplicationInfo *>(info, "_appInfo");
+    SBApplicationInfo *info = MSHookIvar<SBApplicationInfo *>(application, "_appInfo");
     if (!info) {
         return NO;
     }
 
-    return MSHookIvar<bool>(info, "_isSystemApplication");
+    return MSHookIvar<BOOL>(info, "_isSystemApplication");
 }
 
 %new
@@ -266,10 +265,13 @@ static void LoadPreferences() {
         return NO;
     }
 
-    BOOL allowsUninstall = false;
+    __block BOOL allowsUninstall = false;
 
     if (respondsToSelector(application, @selector(isUninstallAllowed))) {
-        allowsUninstall = [application performSelectorOnMainThread:@selector(isUninstallAllowed) withObject:nil waitUntilDone:YES];
+        //-[SBApplication isUninstallAllowed] requires being run on the main thread, run specifically just in case we're not for some reason
+        dispatch_async(dispatch_get_main_queue(), ^{
+            allowsUninstall = [application isUninstallAllowed];
+        });
     }
 
     if (!allowsUninstall) {
@@ -277,10 +279,6 @@ static void LoadPreferences() {
         if (respondsToSelector(_SBApplicationIcon, @selector(allowsUninstall), true)){
             SBApplicationIcon *icon = [[_SBApplicationIcon alloc] initWithApplication:application];
             allowsUninstall = [icon allowsUninstall]; //CyDelete hooks this method to allow uninstallation4
-        }
-
-        if (!allowsUninstall && respondsToSelector(application, @selector(iconAllowsUninstall:))) {
-            allowsUninstall = [application iconAllowsUninstall:icon]; //support the Apple Store app with a 'com.apple.' bundleID which is broken by CyDelete
         }
     }
 
@@ -319,11 +317,11 @@ static void LoadPreferences() {
 
             [systemService sendActions:actions withResult:nil];
         } else {
-            UIApplication *application = [UIApplication sharedApplication];
-            if (respondsToSelector(application, @selector(_relaunchSpringboardNow))) {
-                [(SpringBoard *)application _relaunchSpringboardNow];
-            } else if (respondsToSelector(application, @selector(_tearDownNow))) {
-                [(SpringBoard *)application _tearDownNow];
+            SpringBoard *springboard = (SpringBoard *)[UIApplication sharedApplication];
+            if (respondsToSelector(springboard, @selector(_relaunchSpringboardNow))) {
+                [springboard _relaunchSpringboardNow];
+            } else if (respondsToSelector(springboard, @selector(_tearDownNow))) {
+                [springboard _tearDownNow];
             } else {
                 UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error"
                                                                     message:@"Unable to respring, as the main respring methods used in SearchDelete are not found. Please send the developer an email containing your iOS Device type, and iOS Version to help fix this issue"

@@ -20,6 +20,9 @@
 @interface SBIcon : NSObject
 @end
 
+@interface SBApplicationInfo : NSObject
+@end
+
 @interface SBApplication : NSObject
 - (BOOL)isSystemApplication;
 - (Class)iconClass;
