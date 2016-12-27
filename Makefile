@@ -1,16 +1,15 @@
-include $(THEOS)/makefiles/common.mk
-TARGET_IPHONEOS_DEPLOYMENT_VERSION = 9.0
+include $(THEOS_MAKE_PATH)/common.mk
+
+FindFiles = $(foreach ext, c cpp m mm x xm xi xmi, $(wildcard $(1)/*.$(ext)))
 
 TWEAK_NAME = SearchDelete
-SearchDelete_FILES = Tweak.xm
+SearchDelete_FILES = $(call FindFiles, Source/Hooks)
 SearchDelete_FRAMEWORKS = UIKit CoreGraphics
-SearchDelete_CFLAGS = -std=c++14
+SearchDelete_PRIVATE_FRAMEWORKS = FrontBoardServices SpringBoardServices
+SearchDelete_CFLAGS = -std=c++14 -Wno-deprecated-declarations
 SearchDelete_LDFLAGS = -stdlib=libc++
 
-SUBPROJECTS += searchdelete
+SUBPROJECTS += Source/PreferenceBundle
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 include $(THEOS_MAKE_PATH)/aggregate.mk
-
-after-install::
-	install.exec "killall -9 SpringBoard"
