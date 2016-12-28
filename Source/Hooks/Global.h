@@ -22,7 +22,7 @@
 @property BOOL isPresentingDeleteAlertItemFromSearch; // currentJitteringCell is nil when -[SBDeleteIconAlertItem alertController] is called
 @property (copy) NSDictionary *preferences;
 @property (copy) NSString *applicationID;
-@property (retain) SearchUISingleResultTableViewCell *currentJitteringCell;
+@property (nonatomic, retain) SearchUISingleResultTableViewCell *currentJitteringCell;
 @end
 
 #endif

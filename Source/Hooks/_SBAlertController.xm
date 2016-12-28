@@ -9,8 +9,9 @@
 #import "../Headers/UIKit/UIAlertAction.h"
 #import "../Headers/Theos/Version-Extensions.h"
 
-#import "Global.h"
 #import "_SBAlertController.h"
+
+#import "Global.h"
 #import "SearchUISingleResultTableViewCell.h"
 #import "SFSearchResult.h"
 #import "SPUISearchViewController.h"
