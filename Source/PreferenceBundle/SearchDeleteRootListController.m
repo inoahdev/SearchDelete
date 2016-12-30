@@ -1,3 +1,4 @@
+#include "../Headers/FrontBoard/FBSystemService.h"
 #include "SearchDeleteRootListController.h"
 
 @interface UIApplication ()
@@ -13,13 +14,6 @@
 	return _specifiers;
 }
 
-- (void)respring {
-    [[UIApplication sharedApplication] suspend];
-    usleep(515000);
-
-    [(SpringBoard *)[UIApplication sharedApplication] _relaunchSpringBoardNow];
-}
-
 - (void)openURL:(NSURL *)url {
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -30,21 +24,22 @@
 	} else {
 		[application openURL:url];
 	}
+	#pragma clang diagnostic pop
 }
 
 - (void)twitter {
 	if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot:"]]) {
-		[self openURL:[NSURL URLWithString:[@"tweetbot:///user_profile/" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:[@"tweetbot:///user_profile/" stringByAppendingString:@"inoahdev"]]];
 	} else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific:"]]) {
-		[self openURL:[NSURL URLWithString:[@"twitterrific://user?screen_name=" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:[@"twitterrific://user?screen_name=" stringByAppendingString:@"inoahdev"]]];
 	} else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter:"]]) {
-		[self openURL:[NSURL URLWithString:[@"twitter://user?screen_name=" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:[@"twitter://user?screen_name=" stringByAppendingString:@"inoahdev"]]];
 	} else {
-		[self openURL:[NSURL URLWithString:[@"https://mobile.twitter.com/" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:[@"https://mobile.twitter.com/" stringByAppendingString:@"inoahdev"]]];
 	}
 }
 
 - (void)github {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://github.com/iNoahDev/SearchDelete"]];
+    [self openURL:[NSURL URLWithString:@"https://github.com/inoahdev/SearchDelete"]];
 }
 @end
