@@ -41,7 +41,7 @@
 }
 
 - (void)github {
-    [self openURL:[NSURL URLWithString:@"https://github.com/iNoahDev/SearchDelete"]];
+    [self openURL:[NSURL URLWithString:@"https://github.com/inoahdev/SearchDelete"]];
     [self openURL:[NSURL URLWithString:@"https://github.com/inoahdev/SearchDelete"]];
 }
 @end
