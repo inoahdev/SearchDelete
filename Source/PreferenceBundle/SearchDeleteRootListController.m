@@ -25,10 +25,7 @@
 		[application openURL:url];
 	}
 
-	<<<<<<< HEAD
-
-	=======
-	>>>>>>> 2c38295b357f0fa74798cc4880411ffc99472159
+	#pragma clang diagnostic pop
 }
 
 - (void)twitter {
