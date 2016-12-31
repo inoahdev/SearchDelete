@@ -14,8 +14,6 @@ static NSMutableDictionary *preferences = nil;
 @end
 
 static void LoadPreferences() {
-    NSLog(@"This does get called");
-
     CFStringRef applicationID = (__bridge CFStringRef)@"com.inoahdev.searchdelete";
     if (CFPreferencesAppSynchronize(applicationID)) {
         CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
