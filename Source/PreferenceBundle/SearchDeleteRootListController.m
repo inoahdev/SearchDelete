@@ -1,3 +1,4 @@
+#include "../Headers/FrontBoard/FBSystemService.h"
 #include "SearchDeleteRootListController.h"
 
 @interface UIApplication ()
@@ -24,22 +25,26 @@
 		[application openURL:url];
 	}
 
-	#pragma clang diagnostic pop
+	<<<<<<< HEAD
+
+	=======
+	>>>>>>> 2c38295b357f0fa74798cc4880411ffc99472159
 }
 
 - (void)twitter {
 	if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot:"]]) {
-		[self openURL:[NSURL URLWithString:[@"tweetbot:///user_profile/" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:@"tweetbot:///user_profile/inoahdev"];
 	} else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific:"]]) {
-		[self openURL:[NSURL URLWithString:[@"twitterrific://user?screen_name=" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:@"twitterrific://user?screen_name=inoahdev"];
 	} else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter:"]]) {
-		[self openURL:[NSURL URLWithString:[@"twitter://user?screen_name=" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:@"twitter://user?screen_name=inoahdev"];
 	} else {
-		[self openURL:[NSURL URLWithString:[@"https://mobile.twitter.com/" stringByAppendingString:@"iNoahDev"]]];
+		[self openURL:[NSURL URLWithString:@"https://mobile.twitter.com/inoahdev"];
 	}
 }
 
 - (void)github {
     [self openURL:[NSURL URLWithString:@"https://github.com/iNoahDev/SearchDelete"]];
+    [self openURL:[NSURL URLWithString:@"https://github.com/inoahdev/SearchDelete"]];
 }
 @end
