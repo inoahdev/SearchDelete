@@ -8,31 +8,26 @@
 #include "../Headers/Theos/Version-Extensions.h"
 #include "Global.h"
 
-static void LoadPreferences(CFNotificationCenterRef center, void *observer, CFStringRef notificationName, const void *object, CFDictionaryRef userInfo) {
-    SearchDeleteTweak *searchDelete = (SearchDeleteTweak *)object;
+static NSMutableDictionary *preferences = nil;
 
-    if (!searchDelete.applicationID) {
-        searchDelete.applicationID = @"com.inoahdev.searchdelete";
-    }
+@interface SearchDeleteTweak ()
+@end
 
-    CFStringRef applicationID = (__bridge CFStringRef)searchDelete.applicationID;
+static void LoadPreferences() {
+    NSLog(@"This does get called");
+
+    CFStringRef applicationID = (__bridge CFStringRef)@"com.inoahdev.searchdelete";
     if (CFPreferencesAppSynchronize(applicationID)) {
-        if (access("/private/var/mobile/Library/Preferences/com.inoahdev.searchdelete.plist", F_OK) != -1) {
-            CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-            if (keyList) {
-                searchDelete.preferences = (NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-                if (searchDelete.preferences) {
-                    [searchDelete.preferences retain];
-                }
-
-                CFRelease(keyList);
-            }
+        CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+        if (keyList) {
+            preferences = [(NSDictionary *)CFPreferencesCopyMultiple(keyList, applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost) mutableCopy];
+            CFRelease(keyList);
         }
     }
 
-    if (!searchDelete.preferences) {
-        searchDelete.preferences = @{@"kEnabledLongPress" : @YES,
-                                     @"kJitter"           : @YES};
+    if (!preferences) {
+        preferences = [@{@"kEnabledLongPress" : @YES,
+                       @"kJitter"             : @YES} mutableCopy];
     }
 }
 
@@ -46,21 +41,42 @@ static void LoadPreferences(CFNotificationCenterRef center, void *observer, CFSt
 
         CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(),
                                         NULL,
-                                        LoadPreferences,
-                                        CFStringCreateWithCString(kCFAllocatorDefault, "iNoahDevSearchDeletePreferencesChangedNotification", kCFStringEncodingUTF8),
-                                        (const void *)sharedInstance,
+                                        (CFNotificationCallback)LoadPreferences,
+                                        (__bridge CFStringRef)@"iNoahDevSearchDeletePreferencesChangedNotification",
+                                        NULL,
                                         CFNotificationSuspensionBehaviorDeliverImmediately);
-        LoadPreferences(NULL, NULL, NULL, sharedInstance, NULL);
+        LoadPreferences();
     });
 
     return sharedInstance;
 }
 
-- (void)setCurrentJitteringCell:(SearchUISingleResultTableViewCell *)cell {
-    self->_currentJitteringCell = [cell retain];
+- (BOOL)isEnabled {
+    return [preferences[@"kEnabledLongPress"] boolValue];
+}
+
+- (void)setIsEnabled:(BOOL)isEnabled {
+    preferences[@"kEnabledLongPress"] = @(isEnabled);
+    CFPreferencesSetAppValue((__bridge CFStringRef)@"kEnabledLongPress", (CFPropertyListRef)@(isEnabled), (__bridge CFStringRef)self.applicationID);
+}
+
+- (BOOL)shouldJitter {
+    return [preferences[@"kJitter"] boolValue];
+}
+
+- (void)setShouldJitter:(BOOL)jitter {
+    preferences[@"kJitter"] = @(jitter);
+    CFPreferencesSetAppValue((__bridge CFStringRef)@"kJitter", (CFPropertyListRef)@(jitter), (__bridge CFStringRef)self.applicationID);
 }
 @end
 
 %ctor {
     [SearchDeleteTweak sharedInstance];
+}
+
+%dtor {
+    if (preferences) {
+        [preferences release];
+        preferences = nil;
+    }
 }

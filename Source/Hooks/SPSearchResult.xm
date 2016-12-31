@@ -56,7 +56,6 @@
 
     SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
     if (!application) {
-        SDDebugLog(@"Result is not an application");
         return NO;
     }
 
@@ -65,26 +64,21 @@
     if ([application respondsToSelector:@selector(isUninstallAllowed)]) {
         //-[SBApplication isUninstallAllowed] requires being run on the main thread, run specifically just in case we're not for some reason
         if (![NSThread isMainThread]) {
-            dispatch_sync(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_main_queue(), ^{
                 allowsUninstall = [application isUninstallAllowed];
             });
         } else {
             allowsUninstall = [application isUninstallAllowed];
         }
-    } else {
-        SDDebugLog(@"application does not respond to selector \"isUninstallAllowed\"");
     }
 
     if (!allowsUninstall) {
         if ([%c(SBApplicationIcon) respondsToSelector:@selector(allowsUninstall)]) {
             SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
             allowsUninstall = [icon allowsUninstall]; //CyDelete hooks this method to allow uninstallation4
-        } else {
-            SDDebugLog(@"SBApplicationIcon does not respond to selector \"allowsUninstall\"");
         }
     }
 
-    SDDebugLog(@"Uninstalling is allowed? (%s)", allowsUninstall ? "YES" : "NO");
     return allowsUninstall;
 }
 %end

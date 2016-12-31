@@ -26,8 +26,8 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
 %hook SearchUISingleResultTableViewCell
 %new
 - (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
-    NSDictionary *preferences = [[SearchDeleteTweak sharedInstance] preferences];
-    if (recognizer.state != UIGestureRecognizerStateBegan || ![preferences[@"kEnabledLongPress"] boolValue]) {
+    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
+    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
         return;
     }
 
@@ -65,25 +65,25 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
         }
     }
 
-    [SearchDeleteTweak sharedInstance].isPresentingDeleteAlertItemFromSearch = YES;
-    [iconController iconCloseBoxTapped:iconView];
-
     //add animations
-    if ([preferences[@"kJitter"] boolValue]) {
+    if ([searchDelete shouldJitter]) {
         [self searchdelete_startJittering];
     }
+
+    [iconController iconCloseBoxTapped:iconView];
 }
 
 %new
 - (void)searchdelete_startJittering {
-    [SearchDeleteTweak sharedInstance].currentJitteringCell = self;
+    [[SearchDeleteTweak sharedInstance] setCurrentJitteringCell:self];
 
-    if (![[self searchdelete_iconImageViewLayer] animationForKey:kSearchDeleteJitterTransformAnimationKey]) {
-        [[self searchdelete_iconImageViewLayer] addAnimation:[%c(SBIconView) _jitterTransformAnimation] forKey:kSearchDeleteJitterTransformAnimationKey];
+    CALayer *iconImageLayer = [self searchdelete_iconImageViewLayer];
+    if (![iconImageLayer animationForKey:kSearchDeleteJitterTransformAnimationKey]) {
+        [iconImageLayer addAnimation:[%c(SBIconView) _jitterTransformAnimation] forKey:kSearchDeleteJitterTransformAnimationKey];
     }
 
-    if (![[self searchdelete_iconImageViewLayer] animationForKey:kSearchDeleteJitterPositionAnimationKey]) {
-        [[self searchdelete_iconImageViewLayer] addAnimation:[%c(SBIconView) _jitterPositionAnimation] forKey:kSearchDeleteJitterPositionAnimationKey];
+    if (![iconImageLayer animationForKey:kSearchDeleteJitterPositionAnimationKey]) {
+        [iconImageLayer addAnimation:[%c(SBIconView) _jitterPositionAnimation] forKey:kSearchDeleteJitterPositionAnimationKey];
     }
 
     objc_setAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -96,15 +96,17 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
 
 %new
 - (void)searchdelete_stopJittering {
-    if ([[self searchdelete_iconImageViewLayer] animationForKey:kSearchDeleteJitterTransformAnimationKey]) {
-        [[self searchdelete_iconImageViewLayer] removeAnimationForKey:kSearchDeleteJitterTransformAnimationKey];
+    CALayer *iconImageLayer = [self searchdelete_iconImageViewLayer];
+    if ([iconImageLayer animationForKey:kSearchDeleteJitterTransformAnimationKey]) {
+        [iconImageLayer removeAnimationForKey:kSearchDeleteJitterTransformAnimationKey];
     }
 
-    if ([[self searchdelete_iconImageViewLayer] animationForKey:kSearchDeleteJitterPositionAnimationKey]) {
-        [[self searchdelete_iconImageViewLayer] removeAnimationForKey:kSearchDeleteJitterPositionAnimationKey];
+    if ([iconImageLayer animationForKey:kSearchDeleteJitterPositionAnimationKey]) {
+        [iconImageLayer removeAnimationForKey:kSearchDeleteJitterPositionAnimationKey];
     }
 
     objc_setAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey, @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [[SearchDeleteTweak sharedInstance] setCurrentJitteringCell:nil];
 }
 
 %end
@@ -115,11 +117,10 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
 - (void)layoutSubviews {
     %orig();
 
+    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
     SFSearchResult *result = self.result;
-    NSDictionary *preferences = [[SearchDeleteTweak sharedInstance] preferences];
 
-    if (![preferences[@"kEnabledLongPress"] boolValue] || ![result isKindOfClass:%c(SFSearchResult)]) {
-        SDDebugLog(@"Preferences is either not enabled (value is %s), or result is not a class (class is %@)", [preferences[@"kEnabledLongPress"] boolValue] ? "YES" : "NO", NSStringFromClass([result class]));
+    if (![searchDelete isEnabled] || ![result isKindOfClass:%c(SFSearchResult)]) {
         return;
     }
 
@@ -155,11 +156,10 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
 - (void)layoutSubviews {
     %orig();
 
+    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
     SPSearchResult *result = self.result;
-    NSDictionary *preferences = [[SearchDeleteTweak sharedInstance] preferences];
 
-    if (![preferences[@"kEnabledLongPress"] boolValue] || ![result isKindOfClass:%c(SPSearchResult)]) {
-        SDDebugLog(@"Preferences is either not enabled (value is %s), or result is not a class (class is %@)", [preferences[@"kEnabledLongPress"] boolValue] ? "YES" : "NO", NSStringFromClass([result class]));
+    if (![searchDelete isEnabled] || ![result isKindOfClass:%c(SPSearchResult)]) {
         return;
     }
 

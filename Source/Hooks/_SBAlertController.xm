@@ -21,9 +21,11 @@
 %group iOS10
 %hook _SBAlertController
 - (void)addAction:(UIAlertAction *)action {
-    if (![[self alertItem] isKindOfClass:%c(SBDeleteIconAlertItem)] || ![SearchDeleteTweak sharedInstance].isPresentingDeleteAlertItemFromSearch) {
+    if (![[self alertItem] isKindOfClass:%c(SBDeleteIconAlertItem)] || ![SearchDeleteTweak sharedInstance].currentJitteringCell) {
         return %orig();
     }
+
+    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
 
     __block UIAlertActionHandler actionHandler = [action handler];
     UIAlertActionStyle actionStyle = [action style];
@@ -35,8 +37,7 @@
             actionHandler(action);
             [actionHandler release];
 
-            [SearchDeleteTweak sharedInstance].isPresentingDeleteAlertItemFromSearch = NO;
-            [[[SearchDeleteTweak sharedInstance] currentJitteringCell] searchdelete_stopJittering];
+            [searchDelete.currentJitteringCell searchdelete_stopJittering];
         };
     } else if (actionStyle == UIAlertActionStyleDestructive || [action.title isEqualToString:SBLocalizedString(@"DELETE_ICON_CONFIRM")]) {
         [actionHandler retain];
@@ -45,10 +46,8 @@
             actionHandler(action);
             [actionHandler release];
 
-            [SearchDeleteTweak sharedInstance].isPresentingDeleteAlertItemFromSearch = NO;
-
-            SearchUISingleResultTableViewCell *cell = [[SearchDeleteTweak sharedInstance] currentJitteringCell];
-            SFSearchResult *result = (SFSearchResult *)[cell result];
+            SearchUISingleResultTableViewCell *cell = [searchDelete currentJitteringCell];
+            SFSearchResult *result = (SFSearchResult *)cell.result;
 
             SPUISearchViewController *searchViewController = [[%c(SPUISearchModel) sharedInstance] delegate];
             if ([result searchdelete_isSystemApplication] && ![[result searchdelete_applicationBundleIdentifier] hasPrefix:@"com.apple"]) {

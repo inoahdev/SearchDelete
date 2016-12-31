@@ -17,12 +17,14 @@
 @interface SearchDeleteTweak : NSObject
 + (instancetype)sharedInstance;
 
-// no nonatomic since this is called on multiple threads
+- (BOOL)isEnabled;
+- (void)setIsEnabled:(BOOL)enabled;
 
-@property BOOL isPresentingDeleteAlertItemFromSearch; // currentJitteringCell is nil when -[SBDeleteIconAlertItem alertController] is called
-@property (copy) NSDictionary *preferences;
+- (BOOL)shouldJitter;
+- (void)setShouldJitter:(BOOL)jitter;
+
 @property (copy) NSString *applicationID;
-@property (nonatomic, retain) SearchUISingleResultTableViewCell *currentJitteringCell;
+@property (retain) SearchUISingleResultTableViewCell *currentJitteringCell;
 @end
 
 #endif

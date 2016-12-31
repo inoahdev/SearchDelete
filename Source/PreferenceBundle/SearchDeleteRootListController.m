@@ -13,13 +13,6 @@
 	return _specifiers;
 }
 
-- (void)respring {
-    [[UIApplication sharedApplication] suspend];
-    usleep(515000);
-
-    [(SpringBoard *)[UIApplication sharedApplication] _relaunchSpringBoardNow];
-}
-
 - (void)openURL:(NSURL *)url {
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -30,6 +23,8 @@
 	} else {
 		[application openURL:url];
 	}
+
+	#pragma clang diagnostic pop
 }
 
 - (void)twitter {
@@ -45,6 +40,6 @@
 }
 
 - (void)github {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://github.com/iNoahDev/SearchDelete"]];
+    [self openURL:[NSURL URLWithString:@"https://github.com/iNoahDev/SearchDelete"]];
 }
 @end
