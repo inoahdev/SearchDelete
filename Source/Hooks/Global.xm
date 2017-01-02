@@ -25,7 +25,7 @@ static void LoadPreferences() {
 
     if (!preferences) {
         preferences = [@{@"kEnabledLongPress" : @YES,
-                       @"kJitter"             : @YES} mutableCopy];
+                         @"kJitter"           : @YES} mutableCopy];
     }
 }
 

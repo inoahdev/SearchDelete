@@ -25,9 +25,9 @@
         return %orig();
     }
 
-    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
-
+    __block SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
     __block UIAlertActionHandler actionHandler = [action handler];
+
     UIAlertActionStyle actionStyle = [action style];
 
     if (actionStyle == UIAlertActionStyleCancel) {

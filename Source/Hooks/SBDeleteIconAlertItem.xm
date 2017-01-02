@@ -14,8 +14,6 @@
 #import "SPUISearchViewController.h"
 #import "SearchUISingleResultTableViewCell.h"
 
-#define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
-
 %group iOS9
 %hook SBDeleteIconAlertItem
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
@@ -33,8 +31,9 @@
     }
 
     NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
+    NSString *deleteButtonTitle = [[NSBundle mainBundle] localizedStringForKey:@"DELETE_ICON_CONFIRM" value:@"None" table:@"SpringBoard"];
 
-    if ([buttonTitle isEqualToString:SBLocalizedString(@"DELETE_ICON_CONFIRM")]) {
+    if ([buttonTitle isEqualToString:deleteButtonTitle]) {
         if ([(SPSearchResult *)currentJitteringCell.result searchdelete_isSystemApplication]) {
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Respring"
                                                             message:@"A respring is required to fully delete System Applications. Until you respring, a non-functioning icon will exist on SpringBoard and Spotlight will still show results for the Application. Do you want to respring now?"

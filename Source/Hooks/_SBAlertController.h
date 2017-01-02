@@ -9,8 +9,4 @@
 #define HOOKS_SBALERTCONTROLLER_H
 
 #include "../Headers/SpringBoardUI/_SBAlertController.h"
-
-@interface _SBAlertController ()
-@end
-
 #endif
