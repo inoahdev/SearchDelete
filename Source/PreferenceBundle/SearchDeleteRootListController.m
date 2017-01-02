@@ -1,10 +1,6 @@
 #include "../Headers/FrontBoard/FBSystemService.h"
 #include "SearchDeleteRootListController.h"
 
-@interface UIApplication ()
-- (void)suspend;
-@end
-
 @implementation SearchDeleteRootListController
 - (NSArray *)specifiers {
 	if (!_specifiers) {

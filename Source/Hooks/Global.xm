@@ -9,12 +9,12 @@
 #include "Global.h"
 
 static NSMutableDictionary *preferences = nil;
+static CFStringRef applicationID = (__bridge CFStringRef)@"com.inoahdev.searchdelete";
 
 @interface SearchDeleteTweak ()
 @end
 
 static void LoadPreferences() {
-    CFStringRef applicationID = (__bridge CFStringRef)@"com.inoahdev.searchdelete";
     if (CFPreferencesAppSynchronize(applicationID)) {
         CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
         if (keyList) {
