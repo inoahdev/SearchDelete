@@ -23,7 +23,6 @@
 - (BOOL)shouldJitter;
 - (void)setShouldJitter:(BOOL)jitter;
 
-@property (copy) NSString *applicationID;
 @property (retain) SearchUISingleResultTableViewCell *currentJitteringCell;
 @end
 

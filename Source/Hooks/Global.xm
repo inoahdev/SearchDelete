@@ -11,9 +11,6 @@
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.inoahdev.searchdelete";
 
-@interface SearchDeleteTweak ()
-@end
-
 static void LoadPreferences() {
     if (CFPreferencesAppSynchronize(applicationID)) {
         CFArrayRef keyList = CFPreferencesCopyKeyList(applicationID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
@@ -55,7 +52,7 @@ static void LoadPreferences() {
 
 - (void)setIsEnabled:(BOOL)isEnabled {
     preferences[@"kEnabledLongPress"] = @(isEnabled);
-    CFPreferencesSetAppValue((__bridge CFStringRef)@"kEnabledLongPress", (CFPropertyListRef)@(isEnabled), (__bridge CFStringRef)self.applicationID);
+    CFPreferencesSetAppValue((__bridge CFStringRef)@"kEnabledLongPress", (CFPropertyListRef)@(isEnabled), applicationID);
 }
 
 - (BOOL)shouldJitter {
@@ -64,7 +61,7 @@ static void LoadPreferences() {
 
 - (void)setShouldJitter:(BOOL)jitter {
     preferences[@"kJitter"] = @(jitter);
-    CFPreferencesSetAppValue((__bridge CFStringRef)@"kJitter", (CFPropertyListRef)@(jitter), (__bridge CFStringRef)self.applicationID);
+    CFPreferencesSetAppValue((__bridge CFStringRef)@"kJitter", (CFPropertyListRef)@(jitter), applicationID);
 }
 @end
 
