@@ -26,13 +26,13 @@
 
 - (void)twitter {
 	if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot:"]]) {
-		[self openURL:[NSURL URLWithString:@"tweetbot:///user_profile/inoahdev"];
+		[self openURL:[NSURL URLWithString:@"tweetbot:///user_profile/inoahdev"]];
 	} else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific:"]]) {
-		[self openURL:[NSURL URLWithString:@"twitterrific://user?screen_name=inoahdev"];
+		[self openURL:[NSURL URLWithString:@"twitterrific://user?screen_name=inoahdev"]];
 	} else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter:"]]) {
-		[self openURL:[NSURL URLWithString:@"twitter://user?screen_name=inoahdev"];
+		[self openURL:[NSURL URLWithString:@"twitter://user?screen_name=inoahdev"]];
 	} else {
-		[self openURL:[NSURL URLWithString:@"https://mobile.twitter.com/inoahdev"];
+		[self openURL:[NSURL URLWithString:@"https://mobile.twitter.com/inoahdev"]];
 	}
 }
 
