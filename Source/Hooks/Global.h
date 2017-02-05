@@ -8,8 +8,8 @@
 #ifndef HOOKS_GLOBAL_H
 #define HOOKS_GLOBAL_H
 
-#include <CoreFoundation/CoreFoundation.h>
-#include <Foundation/Foundation.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <Foundation/Foundation.h>
 
 #define SDDebugLog(FORMAT, ...) NSLog(@"[SearchDelete] " FORMAT, ##__VA_ARGS__)
 

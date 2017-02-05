@@ -8,7 +8,7 @@
 #ifndef HOOKS_SEARCH_UI_SINGLE_RESULT_TABLEVIEW_CELL_H
 #define HOOKS_SEARCH_UI_SINGLE_RESULT_TABLEVIEW_CELL_H
 
-#include "../Headers/SearchUI/SearchUISingleResultTableViewCell.h"
+#import "../Headers/SearchUI/SearchUISingleResultTableViewCell.h"
 
 @interface SearchUISingleResultTableViewCell () <UIAlertViewDelegate>
 - (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer;

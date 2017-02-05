@@ -5,12 +5,12 @@
 //  Copyright © 2016 inoahdev. All rights reserved.
 //
 
-#include "../Headers/SpringBoard/SBApplicationController.h"
-#include "../Headers/SpringBoard/SBApplicationIcon.h"
-#include "../Headers/Theos/Version-Extensions.h"
+#import "../Headers/SpringBoard/SBApplicationController.h"
+#import "../Headers/SpringBoard/SBApplicationIcon.h"
+#import "../Headers/Theos/Version-Extensions.h"
 
-#include "Global.h"
-#include "SFSearchResult.h"
+#import "Global.h"
+#import "SFSearchResult.h"
 
 %group iOS10
 %hook SFSearchResult

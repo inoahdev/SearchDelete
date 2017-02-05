@@ -8,7 +8,7 @@
 #ifndef HOOKS_SPSEARCHRESULT_H
 #define HOOKS_SPSEARCHRESULT_H
 
-#include "../Headers/Search/SPSearchResult.h"
+#import "../Headers/Search/SPSearchResult.h"
 
 @interface SPSearchResult ()
 - (BOOL)searchdelete_isApplication;

@@ -5,13 +5,13 @@
 //  Copyright © 2016 inoahdev. All rights reserved.
 //
 
-#include "../Headers/SpringBoard/SBApplicationIcon.h"
-#include "../Headers/SpringBoard/SBApplicationController.h"
+#import "../Headers/SpringBoard/SBApplicationIcon.h"
+#import "../Headers/SpringBoard/SBApplicationController.h"
 
-#include "../Headers/Theos/Version-Extensions.h"
+#import "../Headers/Theos/Version-Extensions.h"
 
-#include "Global.h"
-#include "SPSearchResult.h"
+#import "Global.h"
+#import "SPSearchResult.h"
 
 %group iOS9
 %hook SPSearchResult

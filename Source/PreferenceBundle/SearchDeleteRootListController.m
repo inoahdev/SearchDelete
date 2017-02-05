@@ -1,3 +1,10 @@
+//
+//  Source/PreferenceBundle/SearchDeleteRootListController.h
+//
+//  Created by inoahdev on 12/25/16
+//  Copyright © 2016 inoahdev. All rights reserved.
+//
+
 #include "SearchDeleteRootListController.h"
 
 @implementation SearchDeleteRootListController
@@ -36,7 +43,6 @@
 }
 
 - (void)github {
-    [self openURL:[NSURL URLWithString:@"https://github.com/inoahdev/SearchDelete"]];
     [self openURL:[NSURL URLWithString:@"https://github.com/inoahdev/SearchDelete"]];
 }
 @end

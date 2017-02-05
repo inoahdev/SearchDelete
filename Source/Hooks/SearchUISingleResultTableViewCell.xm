@@ -5,17 +5,17 @@
 //  Copyright © 2016 inoahdev. All rights reserved.
 //
 
-#include "../Headers/SpringBoard/SBIconController.h"
-#include "../Headers/SpringBoard/SBIconModel.h"
-#include "../Headers/SpringBoard/SBIconViewMap.h"
+#import "../Headers/SpringBoard/SBIconController.h"
+#import "../Headers/SpringBoard/SBIconModel.h"
+#import "../Headers/SpringBoard/SBIconViewMap.h"
 
-#include "../Headers/Theos/Version-Extensions.h"
+#import "../Headers/Theos/Version-Extensions.h"
 
-#include "Global.h"
-#include "SFSearchResult.h"
-#include "SPSearchResult.h"
+#import "Global.h"
+#import "SFSearchResult.h"
+#import "SPSearchResult.h"
 
-#include "SearchUISingleResultTableViewCell.h"
+#import "SearchUISingleResultTableViewCell.h"
 
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";

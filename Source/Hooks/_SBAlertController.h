@@ -8,5 +8,5 @@
 #ifndef HOOKS_SBALERTCONTROLLER_H
 #define HOOKS_SBALERTCONTROLLER_H
 
-#include "../Headers/SpringBoardUI/_SBAlertController.h"
+#import "../Headers/SpringBoardUI/_SBAlertController.h"
 #endif

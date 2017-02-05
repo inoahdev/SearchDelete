@@ -5,8 +5,8 @@
 //  Copyright © 2016 inoahdev. All rights reserved.
 //
 
-#include "../Headers/Theos/Version-Extensions.h"
-#include "Global.h"
+#import "../Headers/Theos/Version-Extensions.h"
+#import "Global.h"
 
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.inoahdev.searchdelete";
@@ -24,6 +24,8 @@ static void LoadPreferences() {
         preferences = [@{@"kEnabledLongPress" : @YES,
                          @"kJitter"           : @YES} mutableCopy];
     }
+
+
 }
 
 @implementation SearchDeleteTweak

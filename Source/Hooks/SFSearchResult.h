@@ -8,7 +8,7 @@
 #ifndef HOOKS_SFSEARCHRESULT_H
 #define HOOKS_SFSEARCHRESULT_H
 
-#include "../Headers/SearchFoundation/SFSearchResult.h"
+#import "../Headers/SearchFoundation/SFSearchResult.h"
 
 @interface SFSearchResult ()
 - (BOOL)searchdelete_isApplication;

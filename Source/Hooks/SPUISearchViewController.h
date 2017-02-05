@@ -8,7 +8,7 @@
 #ifndef HOOKS_SPUISEARCHVIEWCONTROLLER_H
 #define HOOKS_SPUISEARCHVIEWCONTROLLER_H
 
-#include "../Headers/SpotlightUI/SPUISearchViewController.h"
+#import "../Headers/SpotlightUI/SPUISearchViewController.h"
 
 @interface SPUISearchViewController () <UIAlertViewDelegate>
 - (BOOL)isActivated;

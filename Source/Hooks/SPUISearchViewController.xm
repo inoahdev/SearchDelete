@@ -5,14 +5,14 @@
 //  Copyright © 2016 inoahdev. All rights reserved.
 //
 
-#include "../Headers/FrontBoardServices/FBSSystemService.h"
-#include "../Headers/SpringBoardServices/SBSRelaunchAction.h"
+#import "../Headers/FrontBoardServices/FBSSystemService.h"
+#import "../Headers/SpringBoardServices/SBSRelaunchAction.h"
 
-#include "../Headers/Theos/Version-Extensions.h"
-#include "Global.h"
+#import "../Headers/Theos/Version-Extensions.h"
+#import "Global.h"
 
-#include "SearchUISingleResultTableViewCell.h"
-#include "SPUISearchViewController.h"
+#import "SearchUISingleResultTableViewCell.h"
+#import "SPUISearchViewController.h"
 
 %group Common
 %hook SPUISearchViewController
