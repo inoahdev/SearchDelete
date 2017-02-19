@@ -2,7 +2,7 @@
 //  Source/Headers/SearchUI/SearchUITextAreaView.h
 //
 //  Created by inoahdev on 12/25/16
-//  Copyright © 2016 inoahdev. All rights reserved.
+//  Copyright © 2016- 2017 inoahdev. All rights reserved.
 //
 
 #ifndef SEARCHUI_SEARCH_UI_TEXT_AREA_VIEW_H

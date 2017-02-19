@@ -2,7 +2,7 @@
 //  Source/Hooks/_SBAlertController.xm
 //
 //  Created by inoahdev on 12/26/16
-//  Copyright © 2016 inoahdev. All rights reserved.
+//  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
 #import "../Headers/SpotlightUI/SPUISearchModel.h"
@@ -73,7 +73,7 @@
 %end
 
 %ctor {
-    if (IS_IOS_BETWEEN(iOS_10, iOS_10_1_1)) {
+    if (IS_IOS_BETWEEN(iOS_10, iOS_10_2)) {
         %init(iOS10);
     }
 }

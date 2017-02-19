@@ -1,5 +1,5 @@
 //
-//  Source/Hooks/SBAlertItem.h
+//  Source/Headers/SpringBoardUI/SBAlertItem.h
 //
 //  Created by inoahdev on 12/26/16
 //  Copyright © 2016 inoahdev. All rights reserved.

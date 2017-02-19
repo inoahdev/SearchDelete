@@ -2,7 +2,7 @@
 //  Source/Headers/Theos/Version-Extensions.h
 //
 //  Created by inoahdev on 12/25/16
-//  Copyright © 2016 inoahdev. All rights reserved.
+//  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
 #ifndef THEOS_VERSION_EXTENSIONS_H
@@ -16,6 +16,10 @@
 
 #ifndef kCFCoreFoundationVersionNumber_iOS_10_1_1
 #define kCFCoreFoundationVersionNumber_iOS_10_1_1 1348
+#endif
+
+#ifndef kCFCoreFoundationVersionNumber_iOS_10_2
+#define kCFCoreFoundationVersionNumber_iOS_10_2 1348.22
 #endif
 
 #endif

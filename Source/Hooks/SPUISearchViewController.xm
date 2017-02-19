@@ -2,7 +2,7 @@
 //  Source/Hooks/SPUISearchViewController.xm
 //
 //  Created by inoahdev on 12/25/16
-//  Copyright © 2016 inoahdev. All rights reserved.
+//  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
 #import "../Headers/FrontBoardServices/FBSSystemService.h"
@@ -73,7 +73,7 @@
 %ctor {
     %init(Common);
 
-    if (IS_IOS_BETWEEN(iOS_10, iOS_10_1_1)) {
+    if (IS_IOS_BETWEEN(iOS_10, iOS_10_2)) {
         %init(iOS10);
     } else if (IS_IOS_BETWEEN(iOS_9_0, iOS_9_3)) {
         %init(iOS9);

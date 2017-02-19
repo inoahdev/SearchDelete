@@ -2,7 +2,7 @@
 //  Source/Hooks/Global.xm
 //
 //  Created by inoahdev on 12/25/16
-//  Copyright © 2016 inoahdev. All rights reserved.
+//  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
 #import "../Headers/Theos/Version-Extensions.h"
@@ -21,11 +21,12 @@ static void LoadPreferences() {
     }
 
     if (!preferences) {
+        SDDebugLog(@"Unable to find Preferences!");
         preferences = [@{@"kEnabledLongPress" : @YES,
                          @"kJitter"           : @YES} mutableCopy];
     }
 
-
+    SDDebugLog(@"Preferences: %@", preferences);
 }
 
 @implementation SearchDeleteTweak
@@ -52,18 +53,8 @@ static void LoadPreferences() {
     return [preferences[@"kEnabledLongPress"] boolValue];
 }
 
-- (void)setIsEnabled:(BOOL)isEnabled {
-    preferences[@"kEnabledLongPress"] = @(isEnabled);
-    CFPreferencesSetAppValue((__bridge CFStringRef)@"kEnabledLongPress", (CFPropertyListRef)@(isEnabled), applicationID);
-}
-
 - (BOOL)shouldJitter {
     return [preferences[@"kJitter"] boolValue];
-}
-
-- (void)setShouldJitter:(BOOL)jitter {
-    preferences[@"kJitter"] = @(jitter);
-    CFPreferencesSetAppValue((__bridge CFStringRef)@"kJitter", (CFPropertyListRef)@(jitter), applicationID);
 }
 @end
 

@@ -2,7 +2,7 @@
 //  Source/Headers/SpotlightUI/SPUISearchModel.h
 //
 //  Created by inoahdev on 12/26/16
-//  Copyright © 2016 inoahdev. All rights reserved.
+//  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
 #ifndef SPOTLIGHTUI_SPUISEARCHMODEL_H
