@@ -67,10 +67,6 @@
     return allowsUninstall;
 }
 
-%new
-- (NSString *)searchdelete_applicationBundleIdentifier {
-    return self.applicationBundleIdentifier;
-}
 %end
 %end
 

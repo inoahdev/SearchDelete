@@ -50,7 +50,7 @@
             SFSearchResult *result = (SFSearchResult *)cell.result;
 
             SPUISearchViewController *searchViewController = [[%c(SPUISearchModel) sharedInstance] delegate];
-            if ([result searchdelete_isSystemApplication] && ![[result searchdelete_applicationBundleIdentifier] hasPrefix:@"com.apple"]) {
+            if ([result searchdelete_isSystemApplication] && ![result.applicationBundleIdentifier hasPrefix:@"com.apple"]) {
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Respring"
                                                                 message:@"A respring is required to fully delete System Applications. Until you respring, a non-functioning icon will exist on SpringBoard and Spotlight will still show results for the Application. Do you want to respring now?"
                                                                delegate:searchViewController

@@ -14,8 +14,6 @@
 - (BOOL)searchdelete_isApplication;
 - (BOOL)searchdelete_isSystemApplication;
 - (BOOL)searchdelete_allowsUninstall;
-
-- (NSString *)searchdelete_applicationBundleIdentifier;
 @end
 
 #endif
