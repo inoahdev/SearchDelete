@@ -1,12 +1,12 @@
 //
-//  Source/Hooks/Global.xm
+//  Source/Classes/SearchDeleteTweak.xm
 //
 //  Created by inoahdev on 12/25/16
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
 #import "../Headers/Theos/Version-Extensions.h"
-#import "Global.h"
+#import "SearchDeleteTweak.h"
 
 static NSMutableDictionary *preferences = nil;
 static CFStringRef applicationID = (__bridge CFStringRef)@"com.inoahdev.searchdelete";

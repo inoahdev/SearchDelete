@@ -5,13 +5,14 @@
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
+#import "../Classes/SearchDeleteTweak.h"
+
 #import "../Headers/SpotlightUI/SPUISearchModel.h"
 #import "../Headers/UIKit/UIAlertAction.h"
 #import "../Headers/Theos/Version-Extensions.h"
 
 #import "_SBAlertController.h"
 
-#import "Global.h"
 #import "SearchUISingleResultTableViewCell.h"
 #import "SFSearchResult.h"
 #import "SPUISearchViewController.h"

@@ -5,8 +5,8 @@
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
+#import "../Classes/SearchDeleteTweak.h"
 #import "../Headers/Theos/Version-Extensions.h"
-#import "Global.h"
 
 #import "SFSearchResult.h"
 #import "SPSearchResult.h"

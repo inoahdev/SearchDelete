@@ -5,11 +5,11 @@
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
+#import "../Classes/SearchDeleteTweak.h"
+
 #import "../Headers/FrontBoardServices/FBSSystemService.h"
 #import "../Headers/SpringBoardServices/SBSRelaunchAction.h"
-
 #import "../Headers/Theos/Version-Extensions.h"
-#import "Global.h"
 
 #import "SearchUISingleResultTableViewCell.h"
 #import "SPUISearchViewController.h"

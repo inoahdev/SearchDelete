@@ -5,13 +5,13 @@
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
+#import "../Classes/SearchDeleteTweak.h"
+
 #import "../Headers/SpringBoard/SBIconController.h"
 #import "../Headers/SpringBoard/SBIconModel.h"
 #import "../Headers/SpringBoard/SBIconViewMap.h"
-
 #import "../Headers/Theos/Version-Extensions.h"
 
-#import "Global.h"
 #import "SFSearchResult.h"
 #import "SPSearchResult.h"
 
