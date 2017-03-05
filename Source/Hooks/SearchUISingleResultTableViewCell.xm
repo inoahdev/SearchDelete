@@ -25,55 +25,6 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 %group Common
 %hook SearchUISingleResultTableViewCell
 %new
-- (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
-    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
-    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
-        return;
-    }
-
-    id result = self.result;
-    if (![result searchdelete_allowsUninstall]) {
-        return;
-    }
-
-    SBIconController *iconController = [%c(SBIconController) sharedInstance];
-    SBIconModel *model = MSHookIvar<SBIconModel *>(iconController, "_iconModel");
-
-    if (!model) {
-        return;
-    }
-
-    SBIconViewMap *homescreenMap = nil;
-    if ([iconController respondsToSelector:@selector(homescreenIconViewMap)]) {
-        homescreenMap = [iconController homescreenIconViewMap];
-    } else if ([%c(SBIconViewMap) respondsToSelector:@selector(homescreenMap)]) {
-        homescreenMap = [%c(SBIconViewMap) homescreenMap];
-    } else {
-        return;
-    }
-
-    SBIcon *icon = [model expectedIconForDisplayIdentifier:[self searchdelete_applicationBundleIdentifier]];
-    if (!icon) {
-        return;
-    }
-
-    SBIconView *iconView = [homescreenMap mappedIconViewForIcon:icon];
-    if (!iconView) {
-        iconView = [homescreenMap iconViewForIcon:icon];
-        if (!iconView) {
-            return;
-        }
-    }
-
-    //add animations
-    if ([searchDelete shouldJitter]) {
-        [self searchdelete_startJittering];
-    }
-
-    [iconController iconCloseBoxTapped:iconView];
-}
-
-%new
 - (void)searchdelete_startJittering {
     [[SearchDeleteTweak sharedInstance] setCurrentJitteringCell:self];
 
@@ -139,6 +90,51 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 }
 
 %new
+- (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
+    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
+    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
+        return;
+    }
+
+    id result = self.result;
+    if (![result searchdelete_allowsUninstall]) {
+        return;
+    }
+
+    SBIconController *iconController = [%c(SBIconController) sharedInstance];
+    SBIconModel *model = MSHookIvar<SBIconModel *>(iconController, "_iconModel");
+
+    if (!model) {
+        return;
+    }
+
+    SBIconViewMap *homescreenMap = [iconController homescreenIconViewMap];
+    if (!homescreenMap) {
+        return;
+    }
+
+    SBIcon *icon = [model expectedIconForDisplayIdentifier:[self searchdelete_applicationBundleIdentifier]];
+    if (!icon) {
+        return;
+    }
+
+    SBIconView *iconView = [homescreenMap mappedIconViewForIcon:icon];
+    if (!iconView) {
+        iconView = [homescreenMap iconViewForIcon:icon];
+        if (!iconView) {
+            return;
+        }
+    }
+
+    //add animations
+    if ([searchDelete shouldJitter]) {
+        [self searchdelete_startJittering];
+    }
+
+    [iconController iconCloseBoxTapped:iconView];
+}
+
+%new
 - (NSString *)searchdelete_applicationBundleIdentifier {
     return [self.result applicationBundleIdentifier];
 }
@@ -175,6 +171,55 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
     if (![self.gestureRecognizers containsObject:longPress]) {
         [self addGestureRecognizer:longPress];
     }
+}
+
+%new
+- (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
+    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
+    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
+        return;
+    }
+
+    id result = self.result;
+    if (![result searchdelete_allowsUninstall]) {
+        return;
+    }
+
+    SBIconController *iconController = [%c(SBIconController) sharedInstance];
+    SBIconModel *model = MSHookIvar<SBIconModel *>(iconController, "_iconModel");
+
+    if (!model) {
+        return;
+    }
+
+    SBIconViewMap *homescreenMap = nil;
+    if ([iconController respondsToSelector:@selector(homescreenIconViewMap)]) {
+        homescreenMap = [iconController homescreenIconViewMap];
+    } else if ([%c(SBIconViewMap) respondsToSelector:@selector(homescreenMap)]) {
+        homescreenMap = [%c(SBIconViewMap) homescreenMap];
+    } else {
+        return;
+    }
+
+    SBIcon *icon = [model expectedIconForDisplayIdentifier:[self searchdelete_applicationBundleIdentifier]];
+    if (!icon) {
+        return;
+    }
+
+    SBIconView *iconView = [homescreenMap mappedIconViewForIcon:icon];
+    if (!iconView) {
+        iconView = [homescreenMap iconViewForIcon:icon];
+        if (!iconView) {
+            return;
+        }
+    }
+
+    //add animations
+    if ([searchDelete shouldJitter]) {
+        [self searchdelete_startJittering];
+    }
+
+    [iconController iconCloseBoxTapped:iconView];
 }
 
 %new
