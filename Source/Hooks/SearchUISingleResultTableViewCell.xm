@@ -81,7 +81,7 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
                                                                                             action:@selector(searchdelete_longPressGestureRecognizer:)];
-    longPress.minimumPressDuration = 0.5; //TODO: find system default
+    longPress.minimumPressDuration = 0.75; //TODO: find system default
     longPress.cancelsTouchesInView = YES;
 
     if (![self.gestureRecognizers containsObject:longPress]) {
@@ -216,7 +216,7 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
                                                                                             action:@selector(searchdelete_longPressGestureRecognizer:)];
-    longPress.minimumPressDuration = 0.5; //TODO: find system default
+    longPress.minimumPressDuration = 0.75; //TODO: find system default
     longPress.cancelsTouchesInView = YES;
 
     if (![self.gestureRecognizers containsObject:longPress]) {
