@@ -90,6 +90,21 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 }
 
 %new
+- (NSString *)searchdelete_applicationBundleIdentifier {
+    return [self.result applicationBundleIdentifier];
+}
+
+%new
+- (CALayer *)searchdelete_iconImageViewLayer {
+    return [self.thumbnailView imageView].layer;
+}
+
+%end
+%end
+
+%group iOS9_3Plus
+%hook SearchUISingleResultTableViewCell
+%new
 - (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
     SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
     if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
@@ -130,15 +145,54 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 
     [iconController iconCloseBoxTapped:iconView];
 }
+%end
+%end
 
+%group iOS9_2Down
+%hook SearchUISingleResultTableViewCell
 %new
-- (NSString *)searchdelete_applicationBundleIdentifier {
-    return [self.result applicationBundleIdentifier];
-}
+- (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
+    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
+    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
+        return;
+    }
 
-%new
-- (CALayer *)searchdelete_iconImageViewLayer {
-    return [self.thumbnailView imageView].layer;
+    id result = self.result;
+    if (![result searchdelete_allowsUninstall]) {
+        return;
+    }
+
+    SBIconController *iconController = [%c(SBIconController) sharedInstance];
+    SBIconModel *model = MSHookIvar<SBIconModel *>(iconController, "_iconModel");
+
+    if (!model) {
+        return;
+    }
+
+    SBIconViewMap *homescreenMap = [%c(SBIconViewMap) homescreenMap];
+    if (!homescreenMap) {
+        return;
+    }
+
+    SBIcon *icon = [model expectedIconForDisplayIdentifier:[self searchdelete_applicationBundleIdentifier]];
+    if (!icon) {
+        return;
+    }
+
+    SBIconView *iconView = [homescreenMap mappedIconViewForIcon:icon];
+    if (!iconView) {
+        iconView = [homescreenMap iconViewForIcon:icon];
+        if (!iconView) {
+            return;
+        }
+    }
+
+    //add animations
+    if ([searchDelete shouldJitter]) {
+        [self searchdelete_startJittering];
+    }
+
+    [iconController iconCloseBoxTapped:iconView];
 }
 
 %end
@@ -171,55 +225,6 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 }
 
 %new
-- (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
-    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
-    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
-        return;
-    }
-
-    id result = self.result;
-    if (![result searchdelete_allowsUninstall]) {
-        return;
-    }
-
-    SBIconController *iconController = [%c(SBIconController) sharedInstance];
-    SBIconModel *model = MSHookIvar<SBIconModel *>(iconController, "_iconModel");
-
-    if (!model) {
-        return;
-    }
-
-    SBIconViewMap *homescreenMap = nil;
-    if ([iconController respondsToSelector:@selector(homescreenIconViewMap)]) {
-        homescreenMap = [iconController homescreenIconViewMap];
-    } else if ([%c(SBIconViewMap) respondsToSelector:@selector(homescreenMap)]) {
-        homescreenMap = [%c(SBIconViewMap) homescreenMap];
-    } else {
-        return;
-    }
-
-    SBIcon *icon = [model expectedIconForDisplayIdentifier:[self searchdelete_applicationBundleIdentifier]];
-    if (!icon) {
-        return;
-    }
-
-    SBIconView *iconView = [homescreenMap mappedIconViewForIcon:icon];
-    if (!iconView) {
-        iconView = [homescreenMap iconViewForIcon:icon];
-        if (!iconView) {
-            return;
-        }
-    }
-
-    //add animations
-    if ([searchDelete shouldJitter]) {
-        [self searchdelete_startJittering];
-    }
-
-    [iconController iconCloseBoxTapped:iconView];
-}
-
-%new
 - (NSString *)searchdelete_applicationBundleIdentifier {
     return [self.result bundleID];
 }
@@ -233,9 +238,17 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 %ctor {
     %init(Common);
 
+    if (IS_IOS_BETWEEN(iOS_9_3, iOS_10_2)) {
+        %init(iOS9_3Plus);
+    }
+
     if (IS_IOS_BETWEEN(iOS_10, iOS_10_2)) {
         %init(iOS10);
-    } else if (IS_IOS_BETWEEN(iOS_9_0, iOS_9_3)) {
+    } else {
+        if (IS_IOS_BETWEEN(iOS_9_0, iOS_9_2)) {
+            %init(iOS9_2Down);
+        }
+
         %init(iOS9);
     }
 }
