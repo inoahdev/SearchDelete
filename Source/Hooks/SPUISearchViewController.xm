@@ -25,6 +25,21 @@
     return NO;
 }
 
+%new
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex != [alertView cancelButtonIndex]) {
+        FBSSystemService *systemService = [FBSSystemService sharedService];
+        SBSRelaunchAction *relaunchAction = [SBSRelaunchAction actionWithReason:@"RestartRenderServer"
+                                                                        options:SBSRelaunchOptionTransitionWithFadeToBlack
+                                                                      targetURL:nil];
+
+        [systemService sendActions:[NSSet setWithObject:relaunchAction] withResult:nil];
+    } else {
+        [self searchdelete_reload];
+    }
+
+    [[SearchDeleteTweak sharedInstance].currentJitteringCell searchdelete_stopJittering];
+}
 %end
 %end
 
@@ -50,22 +65,6 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.01 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
         [self _searchFieldEditingChanged];
     });
-}
-
-%new
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if (buttonIndex != [alertView cancelButtonIndex]) {
-        FBSSystemService *systemService = [FBSSystemService sharedService];
-        SBSRelaunchAction *relaunchAction = [SBSRelaunchAction actionWithReason:@"RestartRenderServer"
-                                                                        options:SBSRelaunchOptionTransitionWithFadeToBlack
-                                                                      targetURL:nil];
-
-        [systemService sendActions:[NSSet setWithObject:relaunchAction] withResult:nil];
-    } else {
-        [self searchdelete_reload];
-    }
-
-    [[SearchDeleteTweak sharedInstance].currentJitteringCell searchdelete_stopJittering];
 }
 %end
 %end
