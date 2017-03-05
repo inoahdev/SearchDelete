@@ -16,11 +16,6 @@
 %group iOS10
 %hook SFSearchResult
 %new
-- (BOOL)searchdelete_isApplication {
-    return [self isLocalApplicationResult];
-}
-
-%new
 - (BOOL)searchdelete_isSystemApplication {
     if (![self isLocalApplicationResult]) {
         return NO;

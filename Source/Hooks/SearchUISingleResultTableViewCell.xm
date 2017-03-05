@@ -20,7 +20,7 @@
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";
 
-static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey;
+static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitteringKey;
 
 %group Common
 %hook SearchUISingleResultTableViewCell
@@ -86,12 +86,12 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
         [iconImageLayer addAnimation:[%c(SBIconView) _jitterPositionAnimation] forKey:kSearchDeleteJitterPositionAnimationKey];
     }
 
-    objc_setAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitteringKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 %new
 - (BOOL)searchdelete_isJittering {
-    return ([objc_getAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey) boolValue]);
+    return ([objc_getAssociatedObject(self, &kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitteringKey) boolValue]);
 }
 
 %new
@@ -105,7 +105,7 @@ static const char *kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJit
         [iconImageLayer removeAnimationForKey:kSearchDeleteJitterPositionAnimationKey];
     }
 
-    objc_setAssociatedObject(self, &kSearchDeleteAssossciatedObjectSingleResultTableViewCellIsJitteringKey, @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(self, &kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitteringKey, @(NO), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [[SearchDeleteTweak sharedInstance] setCurrentJitteringCell:nil];
 }
 
