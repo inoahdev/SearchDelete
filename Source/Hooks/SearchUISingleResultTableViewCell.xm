@@ -179,12 +179,9 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
         return;
     }
 
-    SBIconView *iconView = [homescreenMap mappedIconViewForIcon:icon];
+    SBIconView *iconView = [homescreenMap iconViewForIcon:icon];
     if (!iconView) {
-        iconView = [homescreenMap iconViewForIcon:icon];
-        if (!iconView) {
-            return;
-        }
+        return;
     }
 
     //add animations
