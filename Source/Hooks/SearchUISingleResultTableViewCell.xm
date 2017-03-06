@@ -20,6 +20,7 @@
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";
 
+static const NSInteger kSearchDeleteLongPressDelayTime = 0.75;
 static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitteringKey;
 
 %group Common
@@ -81,7 +82,7 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
                                                                                             action:@selector(searchdelete_longPressGestureRecognizer:)];
-    longPress.minimumPressDuration = 0.75; //TODO: find system default
+    longPress.minimumPressDuration = kSearchDeleteLongPressDelayTime;
     longPress.cancelsTouchesInView = YES;
 
     if (![self.gestureRecognizers containsObject:longPress]) {
@@ -213,7 +214,7 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self
                                                                                             action:@selector(searchdelete_longPressGestureRecognizer:)];
-    longPress.minimumPressDuration = 0.75; //TODO: find system default
+    longPress.minimumPressDuration = kSearchDeleteLongPressDelayTime;
     longPress.cancelsTouchesInView = YES;
 
     if (![self.gestureRecognizers containsObject:longPress]) {
