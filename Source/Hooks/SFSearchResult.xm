@@ -35,7 +35,7 @@
         return NO;
     }
 
-    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.applicationBundleIdentifier];
+    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[self applicationBundleIdentifier]];
     if (!application) {
         return NO;
     }
@@ -57,6 +57,8 @@
         if ([%c(SBApplicationIcon) respondsToSelector:@selector(allowsUninstall)]) {
             SBApplicationIcon *icon = [[%c(SBApplicationIcon) alloc] initWithApplication:application];
             allowsUninstall = [icon allowsUninstall]; //CyDelete hooks this method to allow uninstallation
+
+            [icon release];
         }
     }
 

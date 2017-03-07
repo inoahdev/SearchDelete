@@ -20,7 +20,7 @@
 static NSString *const kSearchDeleteJitterTransformAnimationKey = @"kSearchDeleteJitterTransformAnimationKey";
 static NSString *const kSearchDeleteJitterPositionAnimationKey = @"kSearchDeleteJitterPositionAnimationKey";
 
-static const NSInteger kSearchDeleteLongPressDelayTime = 0.75;
+static const double kSearchDeleteLongPressDelayTime = 0.75;
 static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitteringKey;
 
 %group Common
