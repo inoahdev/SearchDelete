@@ -14,6 +14,7 @@
 @interface SPUISearchViewController : UIViewController
 + (instancetype)sharedInstance;
 - (SPUISearchHeader *)searchHeader;
+- (void)_searchFieldEditingChanged;
 - (void)queryContextDidChange:(SPSearchQueryContext *)queryContext allowZKW:(BOOL)zkw;
 @end
 

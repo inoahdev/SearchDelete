@@ -12,7 +12,6 @@
 
 @interface SPUISearchViewController () <UIAlertViewDelegate>
 - (BOOL)isActivated;
-- (void)_searchFieldEditingChanged;
 - (void)searchdelete_reload;
 @end
 
