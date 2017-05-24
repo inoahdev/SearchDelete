@@ -1,16 +1,17 @@
 //
 //  Source/Hooks/SearchUISingleResultTableViewCell.xm
+//  SearchDelete
 //
 //  Created by inoahdev on 12/25/16
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
+#import <version.h>
 #import "../Classes/SearchDeleteTweak.h"
 
 #import "../Headers/SpringBoard/SBIconController.h"
 #import "../Headers/SpringBoard/SBIconModel.h"
 #import "../Headers/SpringBoard/SBIconViewMap.h"
-#import "../Headers/Theos/Version-Extensions.h"
 
 #import "SFSearchResult.h"
 #import "SPSearchResult.h"
@@ -240,7 +241,7 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
         %init(iOS9_3Plus);
     }
 
-    if (IS_IOS_BETWEEN(iOS_10, iOS_10_2)) {
+    if (IS_IOS_BETWEEN(iOS_10_0, iOS_10_2)) {
         %init(iOS10);
     } else {
         if (IS_IOS_BETWEEN(iOS_9_0, iOS_9_2)) {

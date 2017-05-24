@@ -1,21 +1,20 @@
 //
 //  Source/Hooks/_SBAlertController.xm
+//  SearchDelete
 //
 //  Created by inoahdev on 12/26/16
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
+#import <version.h>
 #import "../Classes/SearchDeleteTweak.h"
 
 #import "../Headers/SpotlightUI/SPUISearchModel.h"
 #import "../Headers/UIKit/UIAlertAction.h"
-#import "../Headers/Theos/Version-Extensions.h"
-
-#import "_SBAlertController.h"
+#import "../Headers/SpringBoardUI/_SBAlertController.h"
 
 #import "SearchUISingleResultTableViewCell.h"
 #import "SFSearchResult.h"
-#import "SPUISearchViewController.h"
 
 #define SBLocalizedString(key) [[NSBundle mainBundle] localizedStringForKey:key value:@"None" table:@"SpringBoard"]
 
@@ -63,7 +62,6 @@
                 });
             } else {
                 [cell searchdelete_stopJittering];
-                [searchViewController searchdelete_reload];
             }
         };
     }
@@ -74,7 +72,7 @@
 %end
 
 %ctor {
-    if (IS_IOS_BETWEEN(iOS_10, iOS_10_2)) {
+    if (IS_IOS_BETWEEN(iOS_10_0, iOS_10_2)) {
         %init(iOS10);
     }
 }

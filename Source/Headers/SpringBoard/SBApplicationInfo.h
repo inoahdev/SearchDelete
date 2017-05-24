@@ -12,6 +12,7 @@
 
 @interface SBApplicationInfo : NSObject
 @property (nonatomic) BOOL systemApplication;
+@property (nonatomic, strong) NSString *bundleIdentifier;
 @end
 
 #endif

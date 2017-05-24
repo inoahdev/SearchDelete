@@ -1,12 +1,13 @@
 //
 //  Source/Headers/SearchUI/SearchUITextAreaView.h
+//  SearchDelete
 //
 //  Created by inoahdev on 12/25/16
 //  Copyright © 2016- 2017 inoahdev. All rights reserved.
 //
 
-#ifndef SEARCHUI_SEARCH_UI_TEXT_AREA_VIEW_H
-#define SEARCHUI_SEARCH_UI_TEXT_AREA_VIEW_H
+#ifndef SEARCHUISEARCHUITEXTAREAVIEW_H
+#define SEARCHUISEARCHUITEXTAREAVIEW_H
 
 #import <CoreFoundation/CoreFoundtion.h>
 

@@ -1,15 +1,16 @@
 //
 //  Source/Hooks/SPSearchResult.xm
+//  SearchDelete
 //
 //  Created by inoahdev on 12/25/16
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
-#import "../Classes/SearchDeleteTweak.h"
+#import <version.h>
 
+#import "../Classes/SearchDeleteTweak.h"
 #import "../Headers/SpringBoard/SBApplicationIcon.h"
 #import "../Headers/SpringBoard/SBApplicationController.h"
-#import "../Headers/Theos/Version-Extensions.h"
 
 #import "SPSearchResult.h"
 

@@ -1,12 +1,13 @@
 //
 //  Source/Headers/SearchUI/SearchUISingleResultTableViewCell.h
+//  SearchDelete
 //
 //  Created by inoahdev on 12/25/16
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
-#ifndef SEARCHUI_SEARCH_UI_SINGLE_RESULT_TABLE_VIEW_CELL_H
-#define SEARCHUI_SEARCH_UI_SINGLE_RESULT_TABLE_VIEW_CELL_H
+#ifndef SEARCHUI_SEARCHUISEARCHUISINGLERESULTTABLEVIEWCELL_H
+#define SEARCHUI_SEARCHUISEARCHUISINGLERESULTTABLEVIEWCELL_H
 
 #import "SearchUIThumbnailView.h"
 

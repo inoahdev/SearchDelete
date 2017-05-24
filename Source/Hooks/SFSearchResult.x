@@ -1,15 +1,16 @@
 //
 //  Source/Hooks/SFSearchResult.xm
+//  SearchDelete
 //
 //  Created by inoahdev on 12/25/16
 //  Copyright © 2016 - 2017 inoahdev. All rights reserved.
 //
 
-#import "../Classes/SearchDeleteTweak.h"
+#import <version.h>
 
+#import "../Classes/SearchDeleteTweak.h"
 #import "../Headers/SpringBoard/SBApplicationController.h"
 #import "../Headers/SpringBoard/SBApplicationIcon.h"
-#import "../Headers/Theos/Version-Extensions.h"
 
 #import "SFSearchResult.h"
 
@@ -69,7 +70,7 @@
 %end
 
 %ctor {
-    if (IS_IOS_BETWEEN(iOS_10, iOS_10_2)) {
+    if (IS_IOS_BETWEEN(iOS_10_0, iOS_10_2)) {
         %init(iOS10);
     }
 }

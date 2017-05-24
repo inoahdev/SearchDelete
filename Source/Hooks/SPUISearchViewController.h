@@ -11,7 +11,6 @@
 #import "../Headers/SpotlightUI/SPUISearchViewController.h"
 
 @interface SPUISearchViewController () <UIAlertViewDelegate>
-- (BOOL)isActivated;
 - (void)searchdelete_reload;
 @end
 
