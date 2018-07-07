@@ -19,7 +19,7 @@
 %new
 - (BOOL)searchdelete_isApplication {
     if (!self.bundleID || self.section_header) {
-        SDDebugLog(@"Either self.bundleID doesn't exist? (%@), or self.section_header is not nil (%@)", self.bundleID, self.section_header);
+        SearchDeleteLogFormat(@"Either self.bundleID doesn't exist? (%@), or self.section_header is not nil (%@)", self.bundleID, self.section_header);
         return NO;
     }
 
@@ -29,19 +29,19 @@
 %new
 - (BOOL)searchdelete_isSystemApplication {
     if (!self.bundleID || self.section_header) {
-        SDDebugLog(@"Either self.bundleID doesn't exist? (%@), or self.section_header is not nil (%@)", self.bundleID, self.section_header);
+        SearchDeleteLogFormat(@"Either self.bundleID doesn't exist? (%@), or self.section_header is not nil (%@)", self.bundleID, self.section_header);
         return NO;
     }
 
     SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:self.bundleID];
     if (!application) {
-        SDDebugLog(@"Unable to get application");
+        SearchDeleteLog(@"Unable to get application");
         return NO;
     }
 
     SBApplicationInfo *info = [application _appInfo];
     if (!info) {
-        SDDebugLog(@"Unable to get application-info");
+        SearchDeleteLog(@"Unable to get application-info");
         return NO;
     }
 
@@ -51,12 +51,19 @@
 %new
 - (BOOL)searchdelete_allowsUninstall {
     if (!self.bundleID || self.section_header) {
-        SDDebugLog(@"Either self.bundleID doesn't exist? (%@), or self.section_header is not nil (%@)", self.bundleID, self.section_header);
+        SearchDeleteLogFormat(@"Either self.bundleID doesn't exist? (%@), or self.section_header is not nil (%@)", self.bundleID, self.section_header);
         return NO;
     }
 
-    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[self bundleID]];
+    NSString *bundleIdentifier = [self bundleID];
+    if (!bundleIdentifier) {
+        SearchDeleteLog(@"bundleIdentifier is nil");
+        return NO;
+    }
+
+    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:bundleIdentifier];
     if (!application) {
+        SearchDeleteLogFormat(@"application for bundleIdentifier %@ is nil", bundleIdentifier);
         return NO;
     }
 

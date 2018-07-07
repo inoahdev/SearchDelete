@@ -36,8 +36,15 @@
         return NO;
     }
 
-    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:[self applicationBundleIdentifier]];
+    NSString *bundleIdentifier = [self applicationBundleIdentifier];
+    if (!bundleIdentifier) {
+        SearchDeleteLog(@"bundleIdentifier is nil");
+        return NO;
+    }
+
+    SBApplication *application = [[%c(SBApplicationController) sharedInstance] applicationWithBundleIdentifier:bundleIdentifier];
     if (!application) {
+        SearchDeleteLogFormat(@"application for bundleIdentifier %@ is nil", bundleIdentifier);
         return NO;
     }
 

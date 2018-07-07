@@ -20,14 +20,16 @@
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     %orig();
 
-    SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
-    SearchUISingleResultTableViewCell *currentJitteringCell = [searchDelete currentJitteringCell];
+    SearchDeleteTweak *tweak = [SearchDeleteTweak sharedInstance];
+    SearchUISingleResultTableViewCell *currentJitteringCell = [tweak currentJitteringCell];
 
     if (!currentJitteringCell) {
+        SearchDeleteLog(@"No search result is currently jittering");
         return;
     }
 
-    if ([searchDelete shouldJitter] && ![currentJitteringCell searchdelete_isJittering]) {
+    if ([tweak shouldJitter] && ![currentJitteringCell searchdelete_isJittering]) {
+        SearchDeleteLog(@"currentJitteringCell is not actually jittering");
         return;
     }
 

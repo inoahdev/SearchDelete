@@ -21,7 +21,13 @@
 %group iOS10
 %hook _SBAlertController
 - (void)addAction:(UIAlertAction *)action {
-    if (![[self alertItem] isKindOfClass:%c(SBDeleteIconAlertItem)] || ![SearchDeleteTweak sharedInstance].currentJitteringCell) {
+    if (![[self alertItem] isKindOfClass:%c(SBDeleteIconAlertItem)]) {
+        SearchDeleteLog(@"_SBAlertController is not a SBDeleteIconAlertItem")
+        return %orig();
+    }
+    
+    if (![[SearchDeleteTweak sharedInstance] currentJitteringCell]) {
+        SearchDeleteLog(@"No search result is currently jittering");
         return %orig();
     }
 

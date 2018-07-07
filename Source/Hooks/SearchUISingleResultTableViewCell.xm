@@ -73,11 +73,18 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
     SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
     SFSearchResult *result = self.result;
 
-    if (![searchDelete isEnabled] || ![result isKindOfClass:%c(SFSearchResult)]) {
+    if (![searchDelete isEnabled]) {
+        SearchDeleteLog(@"SearchDelete is not enabled");
+        return;
+    }
+
+    if (![result isKindOfClass:%c(SFSearchResult)]) {
+        SearchDeleteLog(@"Cell is not a SFSearchResult");
         return;
     }
 
     if (![result searchdelete_allowsUninstall]) {
+        SearchDeleteLog(@"Cell does not allow uninstall")
         return;
     }
 
@@ -109,12 +116,19 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 %new
 - (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
     SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
-    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
+    if (![searchDelete isEnabled]) {
+        SearchDeleteLog(@"SearchDelete is not enabled")
+        return;
+    }
+
+    if (recognizer.state != UIGestureRecognizerStateBegan) {
+        SearchDeleteLog(@"Recognizer is not in its begin state");
         return;
     }
 
     id result = self.result;
     if (![result searchdelete_allowsUninstall]) {
+        SearchDeleteLog(@"Cell does not allow uninstall")
         return;
     }
 
@@ -127,16 +141,25 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 
     SBIconViewMap *homescreenMap = [iconController homescreenIconViewMap];
     if (!homescreenMap) {
+        SearchDeleteLog(@"homescreenMap is nil")
         return;
     }
 
-    SBIcon *icon = [model expectedIconForDisplayIdentifier:[self searchdelete_applicationBundleIdentifier]];
+    NSString *bundleIdentifier = [self searchdelete_applicationBundleIdentifier];
+    if (!bundleIdentifier) {
+        SearchDeleteLog(@"cell's bundleIdentifier is nil");
+        return;
+    }
+
+    SBIcon *icon = [model expectedIconForDisplayIdentifier:bundleIdentifier];
     if (!icon) {
+        SearchDeleteLogFormat(@"An SBIcon for bundleIdentifier %@ is nil", bundleIdentifier);
         return;
     }
 
     SBIconView *iconView = [homescreenMap iconViewForIcon:icon];
     if (!iconView) {
+        SearchDeleteLogFormat(@"iconView for SBIcon for bundleIdentifier %@ is nil", bundleIdentifier);
         return;
     }
 
@@ -155,12 +178,19 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
 %new
 - (void)searchdelete_longPressGestureRecognizer:(UILongPressGestureRecognizer *)recognizer {
     SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
-    if (recognizer.state != UIGestureRecognizerStateBegan || ![searchDelete isEnabled]) {
+    if (![searchDelete isEnabled]) {
+        SearchDeleteLog(@"SearchDelete is not enabled")
+        return;
+    }
+
+    if (recognizer.state != UIGestureRecognizerStateBegan) {
+        SearchDeleteLog(@"SearchDelete is not enabled")
         return;
     }
 
     id result = self.result;
     if (![result searchdelete_allowsUninstall]) {
+        SearchDeleteLog(@"Cell does not allow uninstall")
         return;
     }
 
@@ -168,21 +198,31 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
     SBIconModel *model = MSHookIvar<SBIconModel *>(iconController, "_iconModel");
 
     if (!model) {
+        SearchDeleteLog(@"SBIconModel of SBIconController is nil");
         return;
     }
 
     SBIconViewMap *homescreenMap = [%c(SBIconViewMap) homescreenMap];
     if (!homescreenMap) {
+        SearchDeleteLog(@"homescreenMap is nil");
         return;
     }
 
-    SBIcon *icon = [model expectedIconForDisplayIdentifier:[self searchdelete_applicationBundleIdentifier]];
+    NSString *bundleIdentifier = [self searchdelete_applicationBundleIdentifier];
+    if (!bundleIdentifier) {
+        SearchDeleteLog(@"Cel''s bundleIdentifier is nil");
+        return;
+    }
+
+    SBIcon *icon = [model expectedIconForDisplayIdentifier:bundleIdentifier];
     if (!icon) {
+        SearchDeleteLogFormat(@"icon for bundleIdentifier %@ is nil", bundleIdentifier);
         return;
     }
 
     SBIconView *iconView = [homescreenMap iconViewForIcon:icon];
     if (!iconView) {
+        SearchDeleteLogFormat(@"icon for bundleIdentifier %@ is nil", bundleIdentifier);
         return;
     }
 
@@ -205,11 +245,18 @@ static const char *kSearchDeleteAssociatedObjectSingleResultTableViewCellIsJitte
     SearchDeleteTweak *searchDelete = [SearchDeleteTweak sharedInstance];
     SPSearchResult *result = self.result;
 
-    if (![searchDelete isEnabled] || ![result isKindOfClass:%c(SPSearchResult)]) {
+    if (![searchDelete isEnabled]) {
+        SearchDeleteLog(@"SearchDelete is not enabled")
+        return;
+    }
+
+    if (![result isKindOfClass:%c(SPSearchResult)]) {
+        SearchDeleteLog(@"Cell is not a SPSearchResult");
         return;
     }
 
     if (![result searchdelete_allowsUninstall]) {
+        SearchDeleteLog(@"Cell does not allow uninstall")
         return;
     }
 

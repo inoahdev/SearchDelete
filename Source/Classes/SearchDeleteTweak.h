@@ -11,18 +11,26 @@
 
 #import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
-#import <os/log.h>
 
 #ifdef DEBUG
-    static os_log_t os_log_key;
-    #define SDDebugLog(FORMAT, ...) do { \
-        NSString *__format__os__log__string__ = [NSString stringWithFormat:FORMAT, ##__VA_ARGS__]; \
-        os_log_debug(os_log_key, "%s", __format__os__log__string__.UTF8String); \
+    #define SearchDeleteLog(str) \
+    do { \
+        NSString *formattedString = [[NSString alloc] initWithFormat:@"%s " str, __PRETTY_FUNCTION__]; \
+        [[SearchDeleteTweak sharedInstance] logString:formattedString]; \
         \
-        [__format__os__log__string__ release]; \
-    } while (false)
+        [formattedString release]; \
+    } while (false);
+    
+    #define SearchDeleteLogFormat(str, ...) \
+    do { \
+        NSString *formattedString = [[NSString alloc] initWithFormat:@"%s " str, __PRETTY_FUNCTION__, ##__VA_ARGS__]; \
+        [[SearchDeleteTweak sharedInstance] logString:formattedString]; \
+        \
+        [formattedString release]; \
+    } while (false);
 #else
-    #define SDDebugLog(FORMAT, ...)
+    #define SearchDeleteLog(str)
+    #define SearchDeleteLogFormat(str, ...)
 #endif
 
 @class SearchUISingleResultTableViewCell;
@@ -31,6 +39,10 @@
 
 - (BOOL)isEnabled;
 - (BOOL)shouldJitter;
+
+#ifdef DEBUG
+- (void)logString:(NSString *)string;
+#endif
 
 @property (retain) SearchUISingleResultTableViewCell *currentJitteringCell;
 @end
